@@ -10,13 +10,16 @@ export default function DebugPage() {
           <h2 className="text-lg font-semibold mb-2">Variables d'Environnement :</h2>
           <ul className="space-y-2">
             <li>
-              <strong>NEXTAUTH_URL:</strong> {process.env.NEXTAUTH_URL || '❌ Non définie'}
+              <strong>NEXTAUTH_URL:</strong> {process.env.NEXTAUTH_URL || '✅ Auto-détectée (Vercel)'}
             </li>
             <li>
               <strong>NEXTAUTH_SECRET:</strong> {process.env.NEXTAUTH_SECRET ? '✅ Définie' : '❌ Non définie'}
             </li>
             <li>
               <strong>DATABASE_URL:</strong> {process.env.DATABASE_URL ? '✅ Définie' : '❌ Non définie'}
+            </li>
+            <li>
+              <strong>URL Actuelle:</strong> {typeof window !== 'undefined' ? window.location.origin : 'N/A'}
             </li>
           </ul>
         </div>

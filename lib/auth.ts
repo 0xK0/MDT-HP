@@ -64,5 +64,8 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
-  }
+  },
+  // Configuration pour Vercel
+  trustHost: true,
+  useSecureCookies: process.env.NODE_ENV === "production"
 }

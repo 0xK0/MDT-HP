@@ -80,12 +80,12 @@ NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="votre-secret-key-ici"
 ```
 
-### Base de données SQLite
+### Base de données MongoDB
 
-Le projet utilise SQLite avec Prisma ORM. SQLite est :
-- ✅ **Simple** : Aucune installation de serveur requise
-- ✅ **Rapide** : Parfait pour le développement
-- ✅ **Portable** : Un seul fichier de base de données
+Le projet utilise MongoDB avec Prisma ORM. MongoDB est :
+- ✅ **Cloud** : Base de données hébergée dans le cloud
+- ✅ **Scalable** : Parfait pour la production
+- ✅ **Fiable** : Haute disponibilité et sauvegarde automatique
 - ✅ **Compatible Vercel** : Fonctionne parfaitement en production
 
 ## Déploiement sur Vercel
@@ -93,7 +93,7 @@ Le projet utilise SQLite avec Prisma ORM. SQLite est :
 1. **Connecter votre repository à Vercel**
 
 2. **Configurer les variables d'environnement dans Vercel :**
-   - `DATABASE_URL` : `file:./dev.db` (SQLite)
+   - `DATABASE_URL` : URL de connexion MongoDB (ex: `mongodb+srv://user:pass@cluster.mongodb.net/mdt-hp`)
    - `NEXTAUTH_URL` : URL de votre application Vercel
    - `NEXTAUTH_SECRET` : Clé secrète pour NextAuth
 

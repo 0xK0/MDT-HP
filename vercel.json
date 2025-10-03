@@ -6,7 +6,7 @@
   "regions": ["cdg1"],
   "env": {
     "NEXTAUTH_URL": "https://your-app.vercel.app",
-    "NEXTAUTH_SECRET": "@nextauth-secret",
-    "DATABASE_URL": "file:./dev.db"
+    "NEXTAUTH_SECRET": "wbYi+ihGzg6vah9P8wUOc39lpY8aSRFl0HBnxsvnlWU=",
+    "DATABASE_URL": "mongodb+srv://username:password@cluster.mongodb.net/mdt-hp?retryWrites=true&w=majority"
   }
 }

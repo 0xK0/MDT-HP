@@ -1,24 +1,10 @@
 import Link from "next/link"
-import { prisma } from "@/lib/prisma"
 import { Plus, Edit, Trash2, Shield, User } from "lucide-react"
 
-async function getUsers() {
-  return await prisma.user.findMany({
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      createdAt: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })
-}
+export const dynamic = 'force-dynamic'
 
-export default async function UsersPage() {
-  const users = await getUsers()
+export default function UsersPage() {
+  const users: any[] = []
 
   const getRoleIcon = (role: string) => {
     return role === "ADMIN" ? Shield : User

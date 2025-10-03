@@ -1,24 +1,10 @@
 import Link from "next/link"
-import { prisma } from "@/lib/prisma"
 import { Plus, Edit, Trash2, Users } from "lucide-react"
 
-async function getGroupuscules() {
-  return await prisma.groupuscule.findMany({
-    include: {
-      _count: {
-        select: {
-          vehicles: true,
-        },
-      },
-    },
-    orderBy: {
-      name: "asc",
-    },
-  })
-}
+export const dynamic = 'force-dynamic'
 
-export default async function GroupusculesPage() {
-  const groupuscules = await getGroupuscules()
+export default function GroupusculesPage() {
+  const groupuscules: any[] = []
 
   return (
     <div className="p-6">

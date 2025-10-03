@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 
@@ -17,7 +17,7 @@ export default function NewVehiclePage() {
   const router = useRouter()
 
   // Charger les groupuscules au montage du composant
-  useState(() => {
+  useEffect(() => {
     fetch("/api/groupuscules")
       .then(res => res.json())
       .then(data => setGroupuscules(data))

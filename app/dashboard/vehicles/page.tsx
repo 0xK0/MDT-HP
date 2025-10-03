@@ -1,20 +1,10 @@
 import Link from "next/link"
-import { prisma } from "@/lib/prisma"
 import { Plus, Eye, Edit, Trash2 } from "lucide-react"
 
-async function getVehicles() {
-  return await prisma.vehicle.findMany({
-    include: {
-      groupuscule: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })
-}
+export const dynamic = 'force-dynamic'
 
-export default async function VehiclesPage() {
-  const vehicles = await getVehicles()
+export default function VehiclesPage() {
+  const vehicles: any[] = []
 
   return (
     <div className="p-6">

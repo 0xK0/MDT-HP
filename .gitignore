@@ -43,7 +43,8 @@ next-env.d.ts
 # prisma
 /app/generated/prisma
 
-# sqlite database
+# database files
 *.db
 *.db-journal
-dev.db
+
+.vercel

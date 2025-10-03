@@ -1,22 +1,13 @@
-import { prisma } from "@/lib/prisma"
 import { Car, Users, Building2, FileText } from "lucide-react"
 
-async function getStats() {
-  const [vehicleCount, groupusculeCount, userCount] = await Promise.all([
-    prisma.vehicle.count(),
-    prisma.groupuscule.count(),
-    prisma.user.count(),
-  ])
+export const dynamic = 'force-dynamic'
 
-  return {
-    vehicleCount,
-    groupusculeCount,
-    userCount,
+export default function DashboardPage() {
+  const stats = {
+    vehicleCount: 0,
+    groupusculeCount: 0,
+    userCount: 0,
   }
-}
-
-export default async function DashboardPage() {
-  const stats = await getStats()
 
   const statCards = [
     {

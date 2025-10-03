@@ -17,6 +17,7 @@ export default function VehiclesPage() {
   const [showFactModal, setShowFactModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [factToDelete, setFactToDelete] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<'ADMIN' | 'USER'>('USER')
   const [factForm, setFactForm] = useState({
     title: "",
     description: "",
@@ -57,6 +58,17 @@ export default function VehiclesPage() {
         console.error('Erreur lors de la récupération des véhicules:', error)
       } finally {
         setLoading(false)
+      }
+    }
+
+    // Charger le rôle utilisateur
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        setUserRole(userData.role)
+      } catch (error) {
+        console.error('Erreur lors du parsing des données utilisateur:', error)
       }
     }
 
@@ -254,6 +266,9 @@ export default function VehiclesPage() {
                       Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Faits
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -287,6 +302,14 @@ export default function VehiclesPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {new Date(vehicle.createdAt).toLocaleDateString("fr-FR")}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <div className="flex items-center">
+                        <FileText className="h-4 w-4 mr-1 text-blue-400" />
+                        <span className="bg-blue-900/30 text-blue-300 px-2 py-1 rounded-md text-xs">
+                          {vehicle.facts?.length || 0}
+                        </span>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                         <ActionButtonsWithRole 
@@ -306,7 +329,7 @@ export default function VehiclesPage() {
                   </tr>
                   {expandedVehicles.has(vehicle.id) && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-6 bg-gray-700">
+                      <td colSpan={7} className="px-6 py-6 bg-gray-700">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <h4 className="text-lg font-semibold text-white flex items-center">
@@ -322,16 +345,18 @@ export default function VehiclesPage() {
                                     <div className="flex-1">
                                       <div className="flex items-start justify-between">
                                         <h5 className="text-base font-semibold text-white mb-2">{fact.title}</h5>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation()
-                                            handleDeleteFact(fact.id)
-                                          }}
-                                          className="text-red-400 hover:text-red-300 ml-4 p-2 rounded hover:bg-red-900/20 transition-colors"
-                                          title="Supprimer ce fait"
-                                        >
-                                          <Trash2 className="h-4 w-4" />
-                                        </button>
+                                        {userRole === 'ADMIN' && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleDeleteFact(fact.id)
+                                            }}
+                                            className="text-red-400 hover:text-red-300 ml-4 p-2 rounded hover:bg-red-900/20 transition-colors"
+                                            title="Supprimer ce fait"
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </button>
+                                        )}
                                       </div>
                                       {fact.description && (
                                         <p className="text-sm text-gray-300 mb-3 leading-relaxed">{fact.description}</p>

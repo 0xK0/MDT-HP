@@ -59,8 +59,11 @@ export default function GroupusculesPage() {
       const response = await fetch('/api/vehicles')
       const data = await response.json()
       
+      // Extraire les véhicules de la réponse paginée
+      const vehiclesData = data.vehicles || data
+      
       // Filtrer les véhicules pour éviter les doublons de plaque
-      const uniqueVehicles = data.reduce((acc: any[], vehicle: any) => {
+      const uniqueVehicles = vehiclesData.reduce((acc: any[], vehicle: any) => {
         const existingVehicle = acc.find(v => v.licensePlate === vehicle.licensePlate)
         if (!existingVehicle) {
           acc.push(vehicle)
@@ -335,40 +338,63 @@ export default function GroupusculesPage() {
                     <div className="text-gray-400">Chargement des véhicules...</div>
                   </div>
                 ) : filteredVehicles.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredVehicles.map((vehicle: any) => (
-                      <div key={vehicle.id} className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-white mb-1">
-                              {vehicle.licensePlate}
-                            </h3>
-                            <p className="text-sm text-gray-300 mb-1">
-                              {vehicle.ownerName}
-                            </p>
-                            {vehicle.vehicleType?.name && (
-                              <p className="text-xs text-gray-400">
-                                {vehicle.vehicleType.name}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <div className="text-xs text-gray-400">
-                            {vehicle.reportNumber && `Rapport: ${vehicle.reportNumber}`}
-                            {vehicle.photoProofDate && ` • Photo: ${vehicle.photoProofDate}`}
-                          </div>
-                          <button
-                            onClick={() => handleAssignVehicle(vehicle.id)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm flex items-center"
-                          >
-                            <Car className="h-4 w-4 mr-1" />
-                            Assigner
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="bg-gray-700 rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-600">
+                        <thead className="bg-gray-600">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Type
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Plaque
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Propriétaire
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Groupuscule
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-gray-700 divide-y divide-gray-600">
+                          {filteredVehicles.map((vehicle: any) => (
+                            <tr key={vehicle.id} className="hover:bg-gray-600 transition-colors">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                {vehicle.vehicleType?.name || '-'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {vehicle.licensePlate}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {vehicle.ownerName}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {vehicle.groupuscule?.name || '-'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {new Date(vehicle.createdAt).toLocaleDateString("fr-FR")}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button
+                                  onClick={() => handleAssignVehicle(vehicle.id)}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                                >
+                                  <Car className="h-4 w-4 mr-1" />
+                                  Assigner
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">

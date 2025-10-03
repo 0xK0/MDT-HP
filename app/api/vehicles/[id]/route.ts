@@ -12,8 +12,7 @@ export async function GET(
       where: { id },
       include: {
         groupuscule: true,
-        vehicleType: true,
-        vehicleModel: true
+        vehicleType: true
       }
     })
 
@@ -45,12 +44,10 @@ export async function PUT(
         reportNumber: data.reportNumber,
         groupusculeId: data.groupusculeId || null,
         vehicleTypeId: data.vehicleTypeId || null,
-        vehicleModelId: data.vehicleModelId || null,
       },
       include: {
         groupuscule: true,
-        vehicleType: true,
-        vehicleModel: true
+        vehicleType: true
       }
     })
 

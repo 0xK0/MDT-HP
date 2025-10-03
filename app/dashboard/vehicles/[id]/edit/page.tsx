@@ -98,13 +98,12 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Modèle du véhicule
+                Type de véhicule
               </label>
               <VehicleModelSelect
-                value={vehicle?.vehicleModelId || ''}
-                onChange={(value) => setVehicle({ ...vehicle, vehicleModelId: value })}
-                vehicleTypeId={vehicle?.vehicleTypeId}
-                placeholder="Sélectionner un modèle..."
+                value={vehicle?.vehicleTypeId || ''}
+                onChange={(value) => setVehicle({ ...vehicle, vehicleTypeId: value })}
+                placeholder="Sélectionner un type de véhicule..."
               />
             </div>
 
@@ -147,23 +146,6 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Type de véhicule
-              </label>
-              <select 
-                value={vehicle?.vehicleTypeId || ''}
-                onChange={(e) => setVehicle({ ...vehicle, vehicleTypeId: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-              >
-                <option value="">Sélectionner un type</option>
-                {vehicleTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">

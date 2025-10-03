@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+
+    const where = search ? {
+      name: {
+        contains: search,
+        mode: 'insensitive' as const
+      }
+    } : {}
+
     const vehicleTypes = await prisma.vehicleType.findMany({
+      where,
       orderBy: { name: 'asc' }
     })
     return NextResponse.json(vehicleTypes)

@@ -14,7 +14,6 @@ export default function NewVehiclePage() {
     reportNumber: "",
     groupusculeId: "",
     vehicleTypeId: "",
-    vehicleModelId: "",
   })
   const [groupuscules, setGroupuscules] = useState<any[]>([])
   const [vehicleTypes, setVehicleTypes] = useState<any[]>([])
@@ -90,13 +89,12 @@ export default function NewVehiclePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Modèle du véhicule
+                Type de véhicule
               </label>
               <VehicleModelSelect
-                value={formData.vehicleModelId}
-                onChange={(value) => setFormData({ ...formData, vehicleModelId: value })}
-                vehicleTypeId={formData.vehicleTypeId}
-                placeholder="Sélectionner un modèle..."
+                value={formData.vehicleTypeId}
+                onChange={(value) => setFormData({ ...formData, vehicleTypeId: value })}
+                placeholder="Sélectionner un type de véhicule..."
               />
             </div>
 
@@ -142,23 +140,6 @@ export default function NewVehiclePage() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Type de véhicule
-              </label>
-              <select 
-                value={formData.vehicleTypeId}
-                onChange={(e) => setFormData({ ...formData, vehicleTypeId: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-              >
-                <option value="">Sélectionner un type</option>
-                {vehicleTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">

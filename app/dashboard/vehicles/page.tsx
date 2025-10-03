@@ -105,7 +105,7 @@ export default async function VehiclesPage({ searchParams }: { searchParams: { s
                     {vehicle.ownerName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {vehicle.groupuscule.name}
+                    {vehicle.groupuscule?.name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {vehicle.reportNumber}

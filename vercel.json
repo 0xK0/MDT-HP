@@ -7,5 +7,10 @@
   "env": {
     "NEXTAUTH_SECRET": "wbYi+ihGzg6vah9P8wUOc39lpY8aSRFl0HBnxsvnlWU=",
     "DATABASE_URL": "mongodb+srv://mdt-hp-user:IApmolRepgPvB7PQ@flashback-hp.hfmjvt7.mongodb.net/mdt-hp?retryWrites=true&w=majority&appName=Flashback-HP"
+  },
+  "functions": {
+    "app/api/auth/[...nextauth]/route.ts": {
+      "maxDuration": 30
+    }
   }
 }

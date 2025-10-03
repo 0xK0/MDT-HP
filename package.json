@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx scripts/seed.ts",
     "db:test": "tsx scripts/test-connection.ts",
+    "auth:test": "tsx scripts/test-auth.ts",
     "deploy": "vercel --prod",
     "deploy:setup": "vercel login && vercel link",
     "deploy:auto": "npm run db:generate && npm run build && vercel --prod"

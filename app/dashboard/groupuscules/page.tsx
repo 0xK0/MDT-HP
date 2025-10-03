@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Plus, Users } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { ActionButtons } from "@/components/ActionButtons"
+import { ActionButtonsWithRole } from "@/components/ActionButtonsWithRole"
 
 export const dynamic = 'force-dynamic'
 
@@ -67,7 +67,7 @@ export default async function GroupusculesPage() {
                 </div>
               </div>
               <div className="ml-4">
-                <ActionButtons id={groupuscule.id} type="groupuscule" />
+                <ActionButtonsWithRole id={groupuscule.id} type="groupuscule" />
               </div>
             </div>
             

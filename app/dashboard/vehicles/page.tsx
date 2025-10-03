@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Plus, Search } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { ActionButtons } from "@/components/ActionButtons"
+import { ActionButtonsWithRole } from "@/components/ActionButtonsWithRole"
 import { VehicleSearch } from "@/components/VehicleSearch"
 
 export const dynamic = 'force-dynamic'
@@ -116,7 +116,7 @@ export default async function VehiclesPage({ searchParams }: { searchParams: { s
                     {new Date(vehicle.createdAt).toLocaleDateString("fr-FR")}
                   </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <ActionButtons id={vehicle.id} type="vehicle" />
+                        <ActionButtonsWithRole id={vehicle.id} type="vehicle" />
                       </td>
                 </tr>
               ))}

@@ -44,6 +44,13 @@ export function OwnerSelect({
     loadAllOwners()
   }, [])
 
+  // Synchroniser searchTerm avec la value initiale
+  useEffect(() => {
+    if (value && value !== searchTerm) {
+      setSearchTerm(value)
+    }
+  }, [value])
+
   // Vérifier si on peut ajouter un nouveau propriétaire
   useEffect(() => {
     if (searchTerm.length > 0) {

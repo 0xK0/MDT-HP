@@ -5,13 +5,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { 
   Car, 
-  Users, 
-  Shield, 
   LogOut, 
   Menu, 
   X,
-  Home,
-  UserPlus,
   Building2
 } from "lucide-react"
 
@@ -73,7 +69,6 @@ export default function DashboardLayout({
     { name: "Véhicules", href: "/dashboard/vehicles", icon: Car },
     { name: "Types de Véhicules", href: "/dashboard/vehicle-types", icon: Car },
     { name: "Groupuscules", href: "/dashboard/groupuscules", icon: Building2 },
-    ...(user.role === "ADMIN" ? [{ name: "Utilisateurs", href: "/dashboard/users", icon: Users }] : []),
   ]
 
   return (
@@ -142,9 +137,8 @@ export default function DashboardLayout({
             <img 
               src="/logo.png" 
               alt="Logo" 
-              className="h-8 w-auto mr-2"
+              className="mx-auto h-20 w-auto"
             />
-            <h1 className="text-xl font-bold text-white">MDT-HP</h1>
           </div>
           <nav className="mt-5 flex-1 px-2 space-y-1">
             {navigation.map((item) => (
@@ -190,9 +184,8 @@ export default function DashboardLayout({
             <img 
               src="/logo.png" 
               alt="Logo" 
-              className="h-8 w-auto mr-2"
+              className="h-25 w-auto mr-2"
             />
-            <h1 className="text-lg font-bold text-white">MDT-HP</h1>
           </div>
           <button
             type="button"

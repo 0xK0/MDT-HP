@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { ActionButtons } from "@/components/ActionButtons"
+import { ActionButtonsWithRole } from "@/components/ActionButtonsWithRole"
 
 export const dynamic = 'force-dynamic'
 
@@ -81,7 +81,7 @@ export default async function VehicleTypesPage() {
                     {new Date(vehicleType.createdAt).toLocaleDateString("fr-FR")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <ActionButtons id={vehicleType.id} type="vehicle-type" />
+                    <ActionButtonsWithRole id={vehicleType.id} type="vehicle-type" />
                   </td>
                 </tr>
               ))}

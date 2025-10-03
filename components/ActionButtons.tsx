@@ -7,11 +7,12 @@ import { Edit, Trash2, Eye } from 'lucide-react'
 interface ActionButtonsProps {
   id: string
   type: 'user' | 'groupuscule' | 'vehicle' | 'vehicle-type'
+  userRole?: 'ADMIN' | 'USER'
   onEdit?: () => void
   onView?: () => void
 }
 
-export function ActionButtons({ id, type, onEdit, onView }: ActionButtonsProps) {
+export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView }: ActionButtonsProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
 
@@ -76,14 +77,16 @@ export function ActionButtons({ id, type, onEdit, onView }: ActionButtonsProps) 
       >
         <Edit className="h-4 w-4" />
       </button>
-      <button
-        onClick={handleDelete}
-        disabled={isDeleting}
-        className="text-red-400 hover:text-red-300 disabled:opacity-50"
-        title="Supprimer"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
+      {userRole === 'ADMIN' && (
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="text-red-400 hover:text-red-300 disabled:opacity-50"
+          title="Supprimer"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
     </div>
   )
 }

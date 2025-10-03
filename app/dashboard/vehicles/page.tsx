@@ -1,15 +1,27 @@
 import Link from "next/link"
-import { Plus } from "lucide-react"
+import { Plus, Search } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { ActionButtons } from "@/components/ActionButtons"
+import { VehicleSearch } from "@/components/VehicleSearch"
 
 export const dynamic = 'force-dynamic'
 
-async function getVehicles() {
+async function getVehicles(searchTerm?: string) {
   try {
+    const where = searchTerm ? {
+      OR: [
+        { model: { contains: searchTerm, mode: 'insensitive' as const } },
+        { licensePlate: { contains: searchTerm, mode: 'insensitive' as const } },
+        { ownerName: { contains: searchTerm, mode: 'insensitive' as const } },
+        { groupuscule: { name: { contains: searchTerm, mode: 'insensitive' as const } } }
+      ]
+    } : {}
+
     const vehicles = await prisma.vehicle.findMany({
+      where,
       include: {
-        groupuscule: true
+        groupuscule: true,
+        vehicleType: true
       },
       orderBy: { createdAt: 'desc' }
     })
@@ -20,8 +32,9 @@ async function getVehicles() {
   }
 }
 
-export default async function VehiclesPage() {
-  const vehicles = await getVehicles()
+export default async function VehiclesPage({ searchParams }: { searchParams: { search?: string } }) {
+  const searchTerm = searchParams.search
+  const vehicles = await getVehicles(searchTerm)
 
   return (
     <div className="p-6">
@@ -41,39 +54,49 @@ export default async function VehiclesPage() {
         </Link>
       </div>
 
+      <div className="mb-6">
+        <VehicleSearch />
+      </div>
+
       <div className="bg-gray-800 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-700">
             <thead className="bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Modèle
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Plaque
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Propriétaire
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Groupuscule
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  N° Rapport
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Modèle
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Plaque
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Propriétaire
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Groupuscule
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      N° Rapport
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
             </thead>
             <tbody className="bg-gray-800 divide-y divide-gray-700">
               {vehicles.map((vehicle: any) => (
                 <tr key={vehicle.id} className="hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {vehicle.model}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {vehicle.vehicleType?.name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {vehicle.licensePlate}

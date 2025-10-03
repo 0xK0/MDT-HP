@@ -35,6 +35,18 @@ model Groupuscule {
   @@map("groupuscules")
 }
 
+model VehicleType {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vehicles Vehicle[]
+
+  @@map("vehicle_types")
+}
+
 model Vehicle {
   id              String      @id @default(auto()) @map("_id") @db.ObjectId
   model           String
@@ -42,10 +54,12 @@ model Vehicle {
   ownerName       String
   reportNumber    String
   groupusculeId   String      @db.ObjectId
+  vehicleTypeId   String?     @db.ObjectId
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
   groupuscule Groupuscule @relation(fields: [groupusculeId], references: [id], onDelete: Cascade)
+  vehicleType VehicleType? @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
 
   @@map("vehicles")
 }

@@ -44,8 +44,8 @@ export default function DashboardLayout({
   }
 
   const navigation = [
-    { name: "Accueil", href: "/dashboard", icon: Home },
     { name: "Véhicules", href: "/dashboard/vehicles", icon: Car },
+    { name: "Types de Véhicules", href: "/dashboard/vehicle-types", icon: Car },
     { name: "Groupuscules", href: "/dashboard/groupuscules", icon: Building2 },
     { name: "Utilisateurs", href: "/dashboard/users", icon: Users },
   ]

@@ -9,6 +9,11 @@ async function getGroupuscules() {
   try {
     const groupuscules = await prisma.groupuscule.findMany({
       include: {
+        vehicles: {
+          include: {
+            vehicleType: true
+          }
+        },
         _count: {
           select: { vehicles: true }
         }
@@ -46,7 +51,7 @@ export default async function GroupusculesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {groupuscules.map((groupuscule: any) => (
           <div key={groupuscule.id} className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-white mb-2">
                   {groupuscule.name}
@@ -65,6 +70,29 @@ export default async function GroupusculesPage() {
                 <ActionButtons id={groupuscule.id} type="groupuscule" />
               </div>
             </div>
+            
+            {groupuscule.vehicles.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium text-gray-300 mb-2">Véhicules :</h4>
+                <div className="space-y-2">
+                  {groupuscule.vehicles.map((vehicle: any) => (
+                    <div key={vehicle.id} className="bg-gray-700 rounded p-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="text-sm text-white font-medium">
+                            {vehicle.licensePlate}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {vehicle.ownerName} • {vehicle.model}
+                            {vehicle.vehicleType && ` • ${vehicle.vehicleType.name}`}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

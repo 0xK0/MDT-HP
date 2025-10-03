@@ -11,11 +11,11 @@ export default function Home() {
   useEffect(() => {
     if (status === "loading") return
 
-    if (session) {
-      router.push("/dashboard")
-    } else {
-      router.push("/login")
-    }
+        if (session) {
+          router.push("/dashboard/vehicles")
+        } else {
+          router.push("/login")
+        }
   }, [session, status, router])
 
   return (

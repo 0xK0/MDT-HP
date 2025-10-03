@@ -6,7 +6,7 @@ import { Edit, Trash2, Eye } from 'lucide-react'
 
 interface ActionButtonsProps {
   id: string
-  type: 'user' | 'groupuscule' | 'vehicle'
+  type: 'user' | 'groupuscule' | 'vehicle' | 'vehicle-type'
   onEdit?: () => void
   onView?: () => void
 }
@@ -22,7 +22,8 @@ export function ActionButtons({ id, type, onEdit, onView }: ActionButtonsProps) 
 
     setIsDeleting(true)
     try {
-      const response = await fetch(`/api/${type}s/${id}`, {
+      const apiPath = type === 'vehicle-type' ? 'vehicle-types' : `${type}s`
+      const response = await fetch(`/api/${apiPath}/${id}`, {
         method: 'DELETE'
       })
 
@@ -43,7 +44,8 @@ export function ActionButtons({ id, type, onEdit, onView }: ActionButtonsProps) 
     if (onEdit) {
       onEdit()
     } else {
-      router.push(`/dashboard/${type}s/${id}/edit`)
+      const editPath = type === 'vehicle-type' ? 'vehicle-types' : `${type}s`
+      router.push(`/dashboard/${editPath}/${id}/edit`)
     }
   }
 
@@ -51,7 +53,8 @@ export function ActionButtons({ id, type, onEdit, onView }: ActionButtonsProps) 
     if (onView) {
       onView()
     } else {
-      router.push(`/dashboard/${type}s/${id}`)
+      const viewPath = type === 'vehicle-type' ? 'vehicle-types' : `${type}s`
+      router.push(`/dashboard/${viewPath}/${id}`)
     }
   }
 

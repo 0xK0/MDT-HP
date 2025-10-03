@@ -46,6 +46,34 @@ async function main() {
     }),
   ])
 
+  // Créer quelques types de véhicules d'exemple
+  const vehicleTypes = await Promise.all([
+    prisma.vehicleType.upsert({
+      where: { name: 'Voiture' },
+      update: {},
+      create: {
+        name: 'Voiture',
+        description: 'Véhicule de tourisme',
+      },
+    }),
+    prisma.vehicleType.upsert({
+      where: { name: 'Moto' },
+      update: {},
+      create: {
+        name: 'Moto',
+        description: 'Véhicule à deux roues',
+      },
+    }),
+    prisma.vehicleType.upsert({
+      where: { name: 'Camion' },
+      update: {},
+      create: {
+        name: 'Camion',
+        description: 'Véhicule utilitaire',
+      },
+    }),
+  ])
+
   // Créer quelques véhicules d'exemple
   const vehicles = await Promise.all([
     prisma.vehicle.create({
@@ -55,6 +83,7 @@ async function main() {
         ownerName: 'Jean Dupont',
         reportNumber: 'RPT-2024-001',
         groupusculeId: groupuscules[0].id,
+        vehicleTypeId: vehicleTypes[0].id,
       },
     }),
     prisma.vehicle.create({
@@ -64,6 +93,7 @@ async function main() {
         ownerName: 'Marie Martin',
         reportNumber: 'RPT-2024-002',
         groupusculeId: groupuscules[1].id,
+        vehicleTypeId: vehicleTypes[0].id,
       },
     }),
     prisma.vehicle.create({
@@ -73,6 +103,7 @@ async function main() {
         ownerName: 'Pierre Durand',
         reportNumber: 'RPT-2024-003',
         groupusculeId: groupuscules[2].id,
+        vehicleTypeId: vehicleTypes[0].id,
       },
     }),
   ])
@@ -80,6 +111,7 @@ async function main() {
   console.log('Seed terminé avec succès!')
   console.log('Utilisateur admin créé:', admin.email)
   console.log('Groupuscules créés:', groupuscules.length)
+  console.log('Types de véhicules créés:', vehicleTypes.length)
   console.log('Véhicules créés:', vehicles.length)
 }
 

@@ -20,9 +20,21 @@ export default function DashboardPage() {
     const loadVehicles = async () => {
       try {
         setLoading(true)
-        const response = await fetch(`/api/vehicles${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : ''}`)
+        const params = new URLSearchParams({
+          page: '1',
+          limit: '20',
+          ...(searchTerm && { search: searchTerm })
+        })
+        
+        const response = await fetch(`/api/vehicles?${params}`)
         const data = await response.json()
-        setVehicles(data)
+        
+        if (data.vehicles && data.pagination) {
+          setVehicles(data.vehicles)
+        } else {
+          // Fallback pour l'ancienne structure
+          setVehicles(Array.isArray(data) ? data : [])
+        }
       } catch (error) {
         console.error('Erreur lors de la récupération des véhicules:', error)
       } finally {

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { X, Save } from 'lucide-react'
-import { GroupusculeSelect } from './GroupusculeSelect'
 import { OwnerSelect } from './OwnerSelect'
 import { VehicleTypeSelect } from './VehicleTypeSelect'
+import { ErrorDialog } from './ErrorDialog'
 
 interface VehicleEditModalProps {
   isOpen: boolean
@@ -17,14 +17,11 @@ export function VehicleEditModal({ isOpen, onClose, vehicle, onSave }: VehicleEd
   const [formData, setFormData] = useState({
     licensePlate: "",
     ownerName: "",
-    reportNumber: "",
-    photoProofDate: "",
-    groupusculeId: "",
     vehicleTypeId: "",
   })
-  const [groupuscules, setGroupuscules] = useState<any[]>([])
-  const [hasGroupuscule, setHasGroupuscule] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   // Charger les données du véhicule
   useEffect(() => {
@@ -32,41 +29,15 @@ export function VehicleEditModal({ isOpen, onClose, vehicle, onSave }: VehicleEd
       setFormData({
         licensePlate: vehicle.licensePlate || "",
         ownerName: vehicle.ownerName || "",
-        reportNumber: vehicle.reportNumber || "",
-        photoProofDate: vehicle.photoProofDate || "",
-        groupusculeId: vehicle.groupusculeId || "",
         vehicleTypeId: vehicle.vehicleTypeId || "",
       })
-      setHasGroupuscule(!!vehicle.groupusculeId)
     }
   }, [vehicle])
 
-  // Charger les groupuscules
-  useEffect(() => {
-    const loadGroupuscules = async () => {
-      try {
-        const response = await fetch('/api/groupuscules')
-        const data = await response.json()
-        setGroupuscules(data)
-      } catch (error) {
-        console.error('Erreur lors du chargement des groupuscules:', error)
-      }
-    }
-
-    if (isOpen) {
-      loadGroupuscules()
-    }
-  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validation : au moins un des deux champs requis
-    if (!formData.reportNumber && !formData.photoProofDate) {
-      alert("Veuillez renseigner au moins le numéro de dossier ou la date photo preuve")
-      return
-    }
-
     setLoading(true)
 
     try {
@@ -75,10 +46,7 @@ export function VehicleEditModal({ isOpen, onClose, vehicle, onSave }: VehicleEd
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          groupusculeId: hasGroupuscule ? formData.groupusculeId : null,
-        }),
+        body: JSON.stringify(formData),
       })
 
       if (response.ok) {
@@ -87,10 +55,12 @@ export function VehicleEditModal({ isOpen, onClose, vehicle, onSave }: VehicleEd
         onClose()
       } else {
         const error = await response.json()
-        alert('Erreur: ' + error.error)
+        setErrorMessage(error.error)
+        setShowErrorDialog(true)
       }
     } catch (error) {
-      alert('Erreur lors de la mise à jour du véhicule')
+      setErrorMessage('Erreur lors de la mise à jour du véhicule')
+      setShowErrorDialog(true)
     } finally {
       setLoading(false)
     }
@@ -155,65 +125,9 @@ export function VehicleEditModal({ isOpen, onClose, vehicle, onSave }: VehicleEd
               </div>
 
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  N° de rapport associé
-                </label>
-                <input
-                  type="text"
-                  value={formData.reportNumber}
-                  onChange={(e) => setFormData({ ...formData, reportNumber: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                  placeholder="Numéro de rapport"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Date photo preuve
-                </label>
-                <input
-                  type="text"
-                  value={formData.photoProofDate}
-                  onChange={(e) => setFormData({ ...formData, photoProofDate: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                  placeholder="Date photo preuve"
-                />
-              </div>
             </div>
 
-            {/* Groupuscule */}
-            <div>
-              <div className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  id="hasGroupuscule"
-                  checked={hasGroupuscule}
-                  onChange={(e) => setHasGroupuscule(e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="hasGroupuscule" className="text-sm font-medium text-gray-300">
-                  Assigner à un groupuscule
-                </label>
-              </div>
-              {hasGroupuscule && (
-                <GroupusculeSelect
-                  value={formData.groupusculeId}
-                  onChange={(value: string) => setFormData({ ...formData, groupusculeId: value })}
-                  hasGroupuscule={hasGroupuscule}
-                  onHasGroupusculeChange={setHasGroupuscule}
-                />
-              )}
-            </div>
 
-            {/* Validation message */}
-            <div className="text-sm text-gray-400">
-              <p>⚠️ Au moins un des deux champs suivants doit être renseigné :</p>
-              <ul className="list-disc list-inside ml-4 mt-1">
-                <li>N° de rapport associé</li>
-                <li>Date photo preuve</li>
-              </ul>
-            </div>
 
             {/* Actions */}
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
@@ -237,6 +151,14 @@ export function VehicleEditModal({ isOpen, onClose, vehicle, onSave }: VehicleEd
           </form>
         </div>
       </div>
+
+      {/* Pop-up d'erreur */}
+      <ErrorDialog
+        isOpen={showErrorDialog}
+        onClose={() => setShowErrorDialog(false)}
+        title="Erreur de modification"
+        message={errorMessage}
+      />
     </div>
   )
 }

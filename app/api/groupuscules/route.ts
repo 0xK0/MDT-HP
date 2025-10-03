@@ -15,6 +15,16 @@ export async function GET(request: NextRequest) {
 
     const groupuscules = await prisma.groupuscule.findMany({
       where,
+      include: {
+        vehicles: {
+          include: {
+            vehicleType: true
+          }
+        },
+        _count: {
+          select: { vehicles: true }
+        }
+      },
       orderBy: {
         name: "asc",
       },
@@ -34,6 +44,16 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
+      },
+      include: {
+        vehicles: {
+          include: {
+            vehicleType: true
+          }
+        },
+        _count: {
+          select: { vehicles: true }
+        }
       },
     })
 

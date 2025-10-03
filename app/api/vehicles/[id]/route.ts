@@ -41,9 +41,16 @@ export async function PUT(
       return NextResponse.json({ error: 'La plaque et le propriétaire sont requis' }, { status: 400 })
     }
 
-    // Validation : au moins un des deux champs requis
-    if (!data.reportNumber && !data.photoProofDate) {
-      return NextResponse.json({ error: 'Veuillez renseigner au moins le numéro de dossier ou la date photo preuve' }, { status: 400 })
+    // Vérifier l'unicité de la plaque d'immatriculation (sauf pour le véhicule actuel)
+    const existingVehicle = await prisma.vehicle.findFirst({
+      where: { 
+        licensePlate: data.licensePlate.toUpperCase(),
+        NOT: { id }
+      }
+    })
+
+    if (existingVehicle) {
+      return NextResponse.json({ error: 'Une plaque d\'immatriculation identique existe déjà' }, { status: 400 })
     }
 
     // Trouver ou créer le propriétaire
@@ -67,8 +74,8 @@ export async function PUT(
         licensePlate: data.licensePlate ? data.licensePlate.toUpperCase() : data.licensePlate,
         ownerName: data.ownerName,
         ownerId: owner?.id || null,
-        reportNumber: data.reportNumber,
-        photoProofDate: data.photoProofDate || null,
+        reportNumber: data.reportNumber || "",
+        photoProofDate: data.photoProofDate || "",
         groupusculeId: data.groupusculeId || null,
         vehicleTypeId: data.vehicleTypeId || null,
       },

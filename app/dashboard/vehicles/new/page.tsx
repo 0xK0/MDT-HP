@@ -4,48 +4,42 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 
-import { GroupusculeSelect } from '@/components/GroupusculeSelect'
 import { OwnerSelect } from '@/components/OwnerSelect'
 import { VehicleTypeSelect } from '@/components/VehicleTypeSelect'
+import { GroupusculeSelect } from '@/components/GroupusculeSelect'
+import { ErrorDialog } from '@/components/ErrorDialog'
 
 export default function NewVehiclePage() {
   const [formData, setFormData] = useState({
     licensePlate: "",
     ownerName: "",
-    reportNumber: "",
-    photoProofDate: "",
-    groupusculeId: "",
     vehicleTypeId: "",
+    groupusculeId: "",
   })
   const [groupuscules, setGroupuscules] = useState<any[]>([])
   const [hasGroupuscule, setHasGroupuscule] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
   const router = useRouter()
 
-  // Charger les données au montage du composant
+  // Charger les groupuscules
   useEffect(() => {
-    const loadData = async () => {
+    const loadGroupuscules = async () => {
       try {
-        // Charger les groupuscules
-        const groupusculesResponse = await fetch('/api/groupuscules')
-        const groupusculesData = await groupusculesResponse.json()
-        setGroupuscules(groupusculesData)
+        const response = await fetch('/api/groupuscules')
+        const data = await response.json()
+        setGroupuscules(data)
       } catch (error) {
-        console.error('Erreur lors du chargement des données:', error)
+        console.error('Erreur lors du chargement des groupuscules:', error)
       }
     }
 
-    loadData()
+    loadGroupuscules()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Validation : au moins un des deux champs doit être rempli
-    if (!formData.reportNumber && !formData.photoProofDate) {
-      alert("Veuillez renseigner au moins le numéro de dossier ou la date photo preuve")
-      return
-    }
     
     setLoading(true)
 
@@ -57,7 +51,7 @@ export default function NewVehiclePage() {
         },
         body: JSON.stringify({
           ...formData,
-          groupusculeId: hasGroupuscule ? formData.groupusculeId : null
+          groupusculeId: hasGroupuscule ? formData.groupusculeId : null,
         }),
       })
 
@@ -65,11 +59,13 @@ export default function NewVehiclePage() {
         router.push("/dashboard/vehicles")
       } else {
         const errorData = await response.json()
-        alert(`Erreur: ${errorData.error}`)
+        setErrorMessage(errorData.error)
+        setShowErrorDialog(true)
       }
     } catch (error) {
       console.error("Erreur lors de la création:", error)
-      alert("Une erreur est survenue lors de la création du véhicule")
+      setErrorMessage("Une erreur est survenue lors de la création du véhicule")
+      setShowErrorDialog(true)
     } finally {
       setLoading(false)
     }
@@ -126,45 +122,29 @@ export default function NewVehiclePage() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                N° de rapport associé
-              </label>
-              <input
-                type="text"
-                value={formData.reportNumber}
-                onChange={(e) => setFormData({ ...formData, reportNumber: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                placeholder="N° de rapport associé"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Date photo preuve
-              </label>
-              <input
-                type="text"
-                value={formData.photoProofDate}
-                onChange={(e) => setFormData({ ...formData, photoProofDate: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                placeholder="Date photo preuve (optionnel)"
-              />
-            </div>
-
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Appartenance
-              </label>
-              <GroupusculeSelect
-                value={formData.groupusculeId}
-                onChange={(value) => setFormData({ ...formData, groupusculeId: value })}
-                hasGroupuscule={hasGroupuscule}
-                onHasGroupusculeChange={setHasGroupuscule}
-                placeholder="Sélectionner un groupuscule..."
-              />
+              <div className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  id="hasGroupuscule"
+                  checked={hasGroupuscule}
+                  onChange={(e) => setHasGroupuscule(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="hasGroupuscule" className="text-sm font-medium text-gray-300">
+                  Assigner à un groupuscule
+                </label>
+              </div>
+              {hasGroupuscule && (
+                <GroupusculeSelect
+                  value={formData.groupusculeId}
+                  onChange={(value) => setFormData({ ...formData, groupusculeId: value })}
+                  hasGroupuscule={hasGroupuscule}
+                  onHasGroupusculeChange={setHasGroupuscule}
+                />
+              )}
             </div>
+
           </div>
 
           <div className="flex space-x-4">
@@ -185,6 +165,14 @@ export default function NewVehiclePage() {
           </div>
         </form>
       </div>
+
+      {/* Pop-up d'erreur */}
+      <ErrorDialog
+        isOpen={showErrorDialog}
+        onClose={() => setShowErrorDialog(false)}
+        title="Erreur de création"
+        message={errorMessage}
+      />
     </div>
   )
 }

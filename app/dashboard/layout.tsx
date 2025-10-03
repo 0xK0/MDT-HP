@@ -8,7 +8,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  Building2
+  Building2,
+  FileText
 } from "lucide-react"
 
 interface User {

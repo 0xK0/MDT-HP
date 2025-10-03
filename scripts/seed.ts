@@ -48,11 +48,8 @@ async function main() {
 
   // Créer quelques véhicules d'exemple
   const vehicles = await Promise.all([
-    prisma.vehicle.upsert({
-      where: { id: 'vehicle-1' },
-      update: {},
-      create: {
-        id: 'vehicle-1',
+    prisma.vehicle.create({
+      data: {
         model: 'BMW X5',
         licensePlate: 'AB-123-CD',
         ownerName: 'Jean Dupont',
@@ -60,11 +57,8 @@ async function main() {
         groupusculeId: groupuscules[0].id,
       },
     }),
-    prisma.vehicle.upsert({
-      where: { id: 'vehicle-2' },
-      update: {},
-      create: {
-        id: 'vehicle-2',
+    prisma.vehicle.create({
+      data: {
         model: 'Mercedes Classe A',
         licensePlate: 'EF-456-GH',
         ownerName: 'Marie Martin',
@@ -72,11 +66,8 @@ async function main() {
         groupusculeId: groupuscules[1].id,
       },
     }),
-    prisma.vehicle.upsert({
-      where: { id: 'vehicle-3' },
-      update: {},
-      create: {
-        id: 'vehicle-3',
+    prisma.vehicle.create({
+      data: {
         model: 'Audi A4',
         licensePlate: 'IJ-789-KL',
         ownerName: 'Pierre Durand',

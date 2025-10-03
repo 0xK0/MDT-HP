@@ -1,36 +1,178 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MDT-HP - Système de Gestion des Véhicules
 
-## Getting Started
+Un système complet de gestion des véhicules avec authentification, gestion des groupuscules et des utilisateurs.
 
-First, run the development server:
+## Fonctionnalités
 
+- 🔐 **Authentification sécurisée** avec NextAuth.js
+- 🚗 **Gestion des véhicules** avec enregistrement complet
+- 🏢 **Gestion des groupuscules** et organisations
+- 👥 **Gestion des utilisateurs** avec rôles (Admin/User)
+- 📊 **Tableau de bord** avec statistiques
+- 🎨 **Interface moderne** avec Tailwind CSS
+- 🚀 **Déploiement Vercel** prêt
+
+## Structure des données
+
+### Véhicules
+- Modèle du véhicule
+- Plaque d'immatriculation
+- Nom du propriétaire
+- N° de rapport associé
+- Appartenance (Groupuscule)
+
+### Groupuscules
+- Nom
+- Description (optionnel)
+
+### Utilisateurs
+- Nom complet
+- Email
+- Mot de passe (hashé)
+- Rôle (ADMIN/USER)
+
+## Installation
+
+1. **Cloner le projet**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <votre-repo>
+cd mdt-hp
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Installer les dépendances**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Configurer la base de données**
+```bash
+# Créer un fichier .env.local avec vos variables d'environnement
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Configurer Prisma**
+```bash
+# Générer le client Prisma
+npm run db:generate
 
-## Learn More
+# Pousser le schéma vers la base de données
+npm run db:push
 
-To learn more about Next.js, take a look at the following resources:
+# Peupler la base de données avec des données d'exemple
+npm run db:seed
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. **Démarrer le serveur de développement**
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Configuration de la base de données
 
-## Deploy on Vercel
+### Variables d'environnement (.env.local)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+# Database (SQLite)
+DATABASE_URL="file:./dev.db"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="votre-secret-key-ici"
+```
+
+### Base de données SQLite
+
+Le projet utilise SQLite avec Prisma ORM. SQLite est :
+- ✅ **Simple** : Aucune installation de serveur requise
+- ✅ **Rapide** : Parfait pour le développement
+- ✅ **Portable** : Un seul fichier de base de données
+- ✅ **Compatible Vercel** : Fonctionne parfaitement en production
+
+## Déploiement sur Vercel
+
+1. **Connecter votre repository à Vercel**
+
+2. **Configurer les variables d'environnement dans Vercel :**
+   - `DATABASE_URL` : `file:./dev.db` (SQLite)
+   - `NEXTAUTH_URL` : URL de votre application Vercel
+   - `NEXTAUTH_SECRET` : Clé secrète pour NextAuth
+
+3. **Déployer**
+```bash
+vercel --prod
+```
+
+4. **Configurer la base de données en production**
+```bash
+# Après le déploiement, exécuter les migrations
+npx prisma db push
+
+# Peupler avec des données d'exemple (optionnel)
+npm run db:seed
+```
+
+> **Note** : Avec SQLite, la base de données est créée automatiquement lors du premier déploiement. Aucune configuration supplémentaire n'est nécessaire !
+
+## Utilisation
+
+### Connexion par défaut
+- **Email** : admin@mdt-hp.com
+- **Mot de passe** : admin123
+
+### Navigation
+- **Dashboard** : Vue d'ensemble avec statistiques
+- **Véhicules** : Liste et gestion des véhicules
+- **Groupuscules** : Gestion des organisations
+- **Utilisateurs** : Gestion des comptes utilisateurs
+
+## Technologies utilisées
+
+- **Next.js 15** - Framework React
+- **TypeScript** - Typage statique
+- **Tailwind CSS** - Styling
+- **Prisma** - ORM pour la base de données
+- **NextAuth.js** - Authentification
+- **SQLite** - Base de données
+- **Vercel** - Déploiement
+
+## Structure du projet
+
+```
+mdt-hp/
+├── app/
+│   ├── api/                 # API Routes
+│   ├── dashboard/           # Pages du dashboard
+│   ├── login/              # Page de connexion
+│   └── layout.tsx          # Layout principal
+├── lib/
+│   ├── auth.ts             # Configuration NextAuth
+│   └── prisma.ts           # Client Prisma
+├── prisma/
+│   └── schema.prisma       # Schéma de base de données
+├── scripts/
+│   └── seed.ts             # Script de données d'exemple
+└── types/
+    └── next-auth.d.ts      # Types NextAuth
+```
+
+## Développement
+
+### Ajouter de nouvelles fonctionnalités
+
+1. **Modifier le schéma Prisma** si nécessaire
+2. **Créer les API routes** dans `app/api/`
+3. **Créer les composants** dans `app/dashboard/`
+4. **Mettre à jour les types** si nécessaire
+
+### Scripts disponibles
+
+- `npm run dev` - Serveur de développement
+- `npm run build` - Build de production
+- `npm run start` - Serveur de production
+- `npm run db:generate` - Générer le client Prisma
+- `npm run db:push` - Pousser le schéma vers la DB
+- `npm run db:seed` - Peupler la base de données
+
+## Support
+
+Pour toute question ou problème, consultez la documentation ou créez une issue.

@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { VehicleTypeSelect } from '@/components/VehicleModelSelect'
 import { GroupusculeSelect } from '@/components/GroupusculeSelect'
 import { OwnerSelect } from '@/components/OwnerSelect'
+import { VehicleTypeSelect } from '@/components/VehicleTypeSelect'
 
 export default function EditVehiclePage({ params }: { params: Promise<{ id: string }> }) {
   const [vehicle, setVehicle] = useState<any>(null)
   const [groupuscules, setGroupuscules] = useState<any[]>([])
-  const [vehicleTypes, setVehicleTypes] = useState<any[]>([])
   const [hasGroupuscule, setHasGroupuscule] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -33,11 +32,6 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
         const groupusculesResponse = await fetch('/api/groupuscules')
         const groupusculesData = await groupusculesResponse.json()
         setGroupuscules(groupusculesData)
-
-        // Charger les types de véhicules
-        const typesResponse = await fetch('/api/vehicle-types')
-        const typesData = await typesResponse.json()
-        setVehicleTypes(typesData)
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error)
       }
@@ -49,6 +43,13 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validation : au moins un des deux champs doit être rempli
+    if (!vehicle?.reportNumber && !vehicle?.photoProofDate) {
+      alert("Veuillez renseigner au moins le numéro de dossier ou la date photo preuve")
+      return
+    }
+    
     setSaving(true)
     
     try {
@@ -103,8 +104,8 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
               </label>
               <VehicleTypeSelect
                 value={vehicle?.vehicleTypeId || ''}
-                onChange={(value) => setVehicle({ ...vehicle, vehicleTypeId: value })}
-                placeholder="Sélectionner un type de véhicule..."
+                onChange={(value: string) => setVehicle({ ...vehicle, vehicleTypeId: value })}
+                placeholder="Sélectionner ou saisir un type de véhicule..."
               />
             </div>
 

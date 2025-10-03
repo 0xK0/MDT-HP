@@ -43,23 +43,10 @@ model VehicleType {
   updatedAt   DateTime @updatedAt
 
   vehicles Vehicle[]
-  vehicleModels VehicleModel[]
 
   @@map("vehicle_types")
 }
 
-model VehicleModel {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String   @unique
-  vehicleTypeId String @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  vehicleType VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
-  vehicles Vehicle[]
-
-  @@map("vehicle_models")
-}
 
 model Owner {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -94,13 +81,11 @@ model Vehicle {
   photoProofDate  String?
   groupusculeId   String?     @db.ObjectId
   vehicleTypeId   String?     @db.ObjectId
-  vehicleModelId  String?     @db.ObjectId
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
   groupuscule Groupuscule? @relation(fields: [groupusculeId], references: [id], onDelete: SetNull)
   vehicleType VehicleType? @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
-  vehicleModel VehicleModel? @relation(fields: [vehicleModelId], references: [id], onDelete: SetNull)
   owner Owner? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
 
   @@map("vehicles")

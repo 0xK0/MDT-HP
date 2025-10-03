@@ -67,7 +67,6 @@ export default function DashboardLayout({
 
   const navigation = [
     { name: "Véhicules", href: "/dashboard/vehicles", icon: Car },
-    { name: "Types de Véhicules", href: "/dashboard/vehicle-types", icon: Car },
     { name: "Groupuscules", href: "/dashboard/groupuscules", icon: Building2 },
   ]
 

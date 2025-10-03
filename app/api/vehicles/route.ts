@@ -7,7 +7,6 @@ export async function GET() {
       include: {
         groupuscule: true,
         vehicleType: true,
-        vehicleModel: true,
         owner: true,
       },
       orderBy: {
@@ -50,7 +49,6 @@ export async function POST(request: NextRequest) {
       include: {
         groupuscule: true,
         vehicleType: true,
-        vehicleModel: true,
         owner: true,
       },
     })

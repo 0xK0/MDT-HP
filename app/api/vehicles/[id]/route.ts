@@ -13,7 +13,6 @@ export async function GET(
       include: {
         groupuscule: true,
         vehicleType: true,
-        vehicleModel: true,
         owner: true
       }
     })
@@ -66,7 +65,6 @@ export async function PUT(
       include: {
         groupuscule: true,
         vehicleType: true,
-        vehicleModel: true,
         owner: true
       }
     })

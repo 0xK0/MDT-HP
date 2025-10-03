@@ -6,17 +6,27 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
 
-    const where = search ? {
-      name: {
+    const where: any = {}
+    
+    if (search) {
+      where.name = {
         contains: search,
-        mode: 'insensitive' as const
+        mode: 'insensitive'
       }
-    } : {}
+    }
 
     const vehicleTypes = await prisma.vehicleType.findMany({
       where,
+      include: {
+        _count: {
+          select: {
+            vehicles: true
+          }
+        }
+      },
       orderBy: { name: 'asc' }
     })
+    
     return NextResponse.json(vehicleTypes)
   } catch (error) {
     console.error('Erreur lors de la récupération des types de véhicules:', error)
@@ -32,10 +42,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Le nom est requis' }, { status: 400 })
     }
 
+    // Vérifier si le type existe déjà
+    const existingType = await prisma.vehicleType.findUnique({
+      where: { name }
+    })
+
+    if (existingType) {
+      return NextResponse.json({ error: 'Ce type de véhicule existe déjà' }, { status: 400 })
+    }
+
     const vehicleType = await prisma.vehicleType.create({
       data: {
         name,
-        description: description || null,
+        description: description || null
+      },
+      include: {
+        _count: {
+          select: {
+            vehicles: true
+          }
+        }
       }
     })
 

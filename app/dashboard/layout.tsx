@@ -87,9 +87,8 @@ export default function DashboardLayout({
               <img 
                 src="/logo.png" 
                 alt="Logo" 
-                className="h-8 w-auto mr-2"
+                className="h-25 w-auto mr-2"
               />
-              <h1 className="text-xl font-bold text-white">MDT-HP</h1>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}

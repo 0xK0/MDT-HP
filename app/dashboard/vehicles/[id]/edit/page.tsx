@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { VehicleModelSelect } from '@/components/VehicleModelSelect'
 import { GroupusculeSelect } from '@/components/GroupusculeSelect'
+import { OwnerSelect } from '@/components/OwnerSelect'
 
 export default function EditVehiclePage({ params }: { params: Promise<{ id: string }> }) {
   const [vehicle, setVehicle] = useState<any>(null)
@@ -124,12 +125,10 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Nom du propriétaire
               </label>
-              <input
-                type="text"
+              <OwnerSelect
                 value={vehicle?.ownerName || ''}
-                onChange={(e) => setVehicle({ ...vehicle, ownerName: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                placeholder="Nom du propriétaire"
+                onChange={(value) => setVehicle({ ...vehicle, ownerName: value })}
+                placeholder="Sélectionner ou saisir un propriétaire..."
               />
             </div>
 

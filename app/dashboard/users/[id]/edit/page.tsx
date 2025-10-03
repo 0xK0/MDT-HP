@@ -3,12 +3,21 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { useSession } from "next-auth/react"
 
 export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const router = useRouter()
+
+  useEffect(() => {
+    if (status === "loading") return
+    if (!session || session.user.role !== "ADMIN") {
+      router.push("/dashboard")
+    }
+  }, [session, status, router])
 
   useEffect(() => {
     // Charger les données de l'utilisateur

@@ -2,6 +2,9 @@ import Link from "next/link"
 import { Plus, Shield, User } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { ActionButtons } from "@/components/ActionButtons"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +21,12 @@ async function getUsers() {
 }
 
 export default async function UsersPage() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session || session.user.role !== "ADMIN") {
+    redirect("/dashboard")
+  }
+
   const users = await getUsers()
 
   const getRoleIcon = (role: string) => {

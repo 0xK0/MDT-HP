@@ -47,7 +47,7 @@ export default function DashboardLayout({
     { name: "Véhicules", href: "/dashboard/vehicles", icon: Car },
     { name: "Types de Véhicules", href: "/dashboard/vehicle-types", icon: Car },
     { name: "Groupuscules", href: "/dashboard/groupuscules", icon: Building2 },
-    { name: "Utilisateurs", href: "/dashboard/users", icon: Users },
+    ...(session.user.role === "ADMIN" ? [{ name: "Utilisateurs", href: "/dashboard/users", icon: Users }] : []),
   ]
 
   return (

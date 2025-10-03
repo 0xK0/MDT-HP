@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { VehicleModelSelect } from '@/components/VehicleModelSelect'
 import { GroupusculeSelect } from '@/components/GroupusculeSelect'
+import { OwnerSelect } from '@/components/OwnerSelect'
 
 export default function NewVehiclePage() {
   const [formData, setFormData] = useState({
@@ -117,13 +118,10 @@ export default function NewVehiclePage() {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Nom du propriétaire
               </label>
-              <input
-                type="text"
+              <OwnerSelect
                 value={formData.ownerName}
-                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                placeholder="Nom du propriétaire"
-                required
+                onChange={(value) => setFormData({ ...formData, ownerName: value })}
+                placeholder="Sélectionner ou saisir un propriétaire..."
               />
             </div>
 

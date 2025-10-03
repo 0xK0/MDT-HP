@@ -1,9 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 export default function NewUserPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -11,7 +14,13 @@ export default function NewUserPage() {
     role: "USER",
   })
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+
+  useEffect(() => {
+    if (status === "loading") return
+    if (!session || session.user.role !== "ADMIN") {
+      router.push("/dashboard")
+    }
+  }, [session, status, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

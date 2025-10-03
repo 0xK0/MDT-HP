@@ -67,9 +67,6 @@ export default async function VehiclesPage({ searchParams }: { searchParams: { s
                       Modèle
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Plaque
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -80,6 +77,9 @@ export default async function VehiclesPage({ searchParams }: { searchParams: { s
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       N° Rapport
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Date photo preuve
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Date
@@ -96,9 +96,6 @@ export default async function VehiclesPage({ searchParams }: { searchParams: { s
                     {vehicle.model}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {vehicle.vehicleType?.name || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {vehicle.licensePlate}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -109,6 +106,9 @@ export default async function VehiclesPage({ searchParams }: { searchParams: { s
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {vehicle.reportNumber}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {vehicle.photoProofDate || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {new Date(vehicle.createdAt).toLocaleDateString("fr-FR")}

@@ -26,9 +26,30 @@ export default function DebugPage() {
         
         <div className="bg-gray-800 p-4 rounded">
           <h2 className="text-lg font-semibold mb-2">Test de Connexion à la Base de Données :</h2>
-          <p className="text-sm text-gray-300">
+          <p className="text-sm text-gray-300 mb-4">
             Vérifiez les logs Vercel pour voir si la connexion à MongoDB fonctionne.
           </p>
+          <button 
+            onClick={async () => {
+              try {
+                const response = await fetch('/api/test-auth', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: 'admin@mdt-hp.com',
+                    password: 'admin123'
+                  })
+                })
+                const result = await response.json()
+                alert(JSON.stringify(result, null, 2))
+              } catch (error) {
+                alert('Erreur: ' + error)
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            Tester l'Authentification
+          </button>
         </div>
         
         <div className="bg-gray-800 p-4 rounded">

@@ -61,11 +61,23 @@ model VehicleModel {
   @@map("vehicle_models")
 }
 
+model Owner {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicles Vehicle[]
+
+  @@map("owners")
+}
+
 model Vehicle {
   id              String      @id @default(auto()) @map("_id") @db.ObjectId
   model           String
   licensePlate    String
   ownerName       String
+  ownerId         String?     @db.ObjectId
   reportNumber    String
   photoProofDate  String?
   groupusculeId   String?     @db.ObjectId
@@ -77,6 +89,7 @@ model Vehicle {
   groupuscule Groupuscule? @relation(fields: [groupusculeId], references: [id], onDelete: SetNull)
   vehicleType VehicleType? @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
   vehicleModel VehicleModel? @relation(fields: [vehicleModelId], references: [id], onDelete: SetNull)
+  owner Owner? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
 
   @@map("vehicles")
 }

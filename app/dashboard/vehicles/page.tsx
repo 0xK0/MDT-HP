@@ -21,7 +21,9 @@ async function getVehicles(searchTerm?: string) {
       where,
       include: {
         groupuscule: true,
-        vehicleType: true
+        vehicleType: true,
+        vehicleModel: true,
+        owner: true
       },
       orderBy: { createdAt: 'desc' }
     })
@@ -93,7 +95,7 @@ export default async function VehiclesPage({ searchParams }: { searchParams: { s
               {vehicles.map((vehicle: any) => (
                 <tr key={vehicle.id} className="hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                    {vehicle.model}
+                    {vehicle.vehicleModel?.name || vehicle.model}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {vehicle.licensePlate}

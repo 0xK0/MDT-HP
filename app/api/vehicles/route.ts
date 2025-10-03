@@ -6,6 +6,9 @@ export async function GET() {
     const vehicles = await prisma.vehicle.findMany({
       include: {
         groupuscule: true,
+        vehicleType: true,
+        vehicleModel: true,
+        owner: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -22,11 +25,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { model, licensePlate, ownerName, reportNumber, photoProofDate, groupusculeId, vehicleTypeId } = body
 
+    // Trouver ou créer le propriétaire
+    let owner = await prisma.owner.findUnique({
+      where: { name: ownerName }
+    })
+
+    if (!owner) {
+      owner = await prisma.owner.create({
+        data: { name: ownerName }
+      })
+    }
+
     const vehicle = await prisma.vehicle.create({
       data: {
         model,
         licensePlate: licensePlate.toUpperCase(), // Conversion automatique en majuscules
         ownerName,
+        ownerId: owner.id,
         reportNumber,
         photoProofDate: photoProofDate || null,
         groupusculeId: groupusculeId || null,
@@ -35,6 +50,8 @@ export async function POST(request: NextRequest) {
       include: {
         groupuscule: true,
         vehicleType: true,
+        vehicleModel: true,
+        owner: true,
       },
     })
 

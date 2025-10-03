@@ -26,25 +26,14 @@ export function OwnerSelect({
   const [showAddOption, setShowAddOption] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Charger les propriétaires existants
+  // Charger tous les propriétaires au montage du composant
   useEffect(() => {
-    const loadOwners = async () => {
+    const loadAllOwners = async () => {
       setLoading(true)
       try {
-        const params = new URLSearchParams()
-        if (searchTerm) {
-          params.set('search', searchTerm)
-        }
-        
-        const response = await fetch(`/api/owners?${params.toString()}`)
+        const response = await fetch('/api/owners')
         const data = await response.json()
         setOwners(data)
-        
-        // Vérifier si le terme de recherche n'existe pas dans les résultats
-        const exactMatch = data.find((owner: Owner) => 
-          owner.name.toLowerCase() === searchTerm.toLowerCase()
-        )
-        setShowAddOption(searchTerm.length > 0 && !exactMatch)
       } catch (error) {
         console.error('Erreur lors du chargement des propriétaires:', error)
       } finally {
@@ -52,10 +41,20 @@ export function OwnerSelect({
       }
     }
 
-    if (searchTerm.length >= 0) {
-      loadOwners()
+    loadAllOwners()
+  }, [])
+
+  // Vérifier si on peut ajouter un nouveau propriétaire
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      const exactMatch = owners.find((owner: Owner) => 
+        owner.name.toLowerCase() === searchTerm.toLowerCase()
+      )
+      setShowAddOption(!exactMatch)
+    } else {
+      setShowAddOption(false)
     }
-  }, [searchTerm])
+  }, [searchTerm, owners])
 
   // Fermer le dropdown quand on clique à l'extérieur
   useEffect(() => {
@@ -77,11 +76,46 @@ export function OwnerSelect({
     setIsOpen(false)
   }
 
-  const handleAddNew = () => {
+  const handleAddNew = async () => {
     if (searchTerm.trim()) {
-      onChange(searchTerm.trim())
-      setSearchTerm(searchTerm.trim())
-      setIsOpen(false)
+      const newOwner = searchTerm.trim()
+      
+      try {
+        // Créer le nouveau propriétaire en base de données
+        const response = await fetch('/api/owners', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: newOwner }),
+        })
+
+        if (response.ok) {
+          const newOwnerData = await response.json()
+          
+          // Mettre à jour la liste locale avec le nouveau propriétaire
+          setOwners(prevOwners => {
+            const exists = prevOwners.find(owner => 
+              owner.name.toLowerCase() === newOwner.toLowerCase()
+            )
+            if (!exists) {
+              return [newOwnerData, ...prevOwners]
+            }
+            return prevOwners
+          })
+          
+          onChange(newOwner)
+          setSearchTerm(newOwner)
+          setIsOpen(false)
+        } else {
+          const errorData = await response.json()
+          console.error('Erreur lors de la création du propriétaire:', errorData.error)
+          alert(`Erreur: ${errorData.error}`)
+        }
+      } catch (error) {
+        console.error('Erreur lors de la création du propriétaire:', error)
+        alert('Erreur lors de la création du propriétaire')
+      }
     }
   }
 

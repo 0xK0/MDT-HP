@@ -12,7 +12,9 @@ export async function GET(
       where: { id },
       include: {
         groupuscule: true,
-        vehicleType: true
+        vehicleType: true,
+        vehicleModel: true,
+        owner: true
       }
     })
 
@@ -35,12 +37,27 @@ export async function PUT(
     const { id } = await params
     const data = await request.json()
 
+    // Trouver ou créer le propriétaire
+    let owner = null
+    if (data.ownerName) {
+      owner = await prisma.owner.findUnique({
+        where: { name: data.ownerName }
+      })
+
+      if (!owner) {
+        owner = await prisma.owner.create({
+          data: { name: data.ownerName }
+        })
+      }
+    }
+
     const vehicle = await prisma.vehicle.update({
       where: { id },
       data: {
         model: data.model,
         licensePlate: data.licensePlate ? data.licensePlate.toUpperCase() : data.licensePlate,
         ownerName: data.ownerName,
+        ownerId: owner?.id || null,
         reportNumber: data.reportNumber,
         photoProofDate: data.photoProofDate || null,
         groupusculeId: data.groupusculeId || null,
@@ -48,7 +65,9 @@ export async function PUT(
       },
       include: {
         groupuscule: true,
-        vehicleType: true
+        vehicleType: true,
+        vehicleModel: true,
+        owner: true
       }
     })
 

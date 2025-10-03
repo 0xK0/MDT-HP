@@ -74,6 +74,50 @@ async function main() {
     }),
   ])
 
+  // Créer quelques modèles de véhicules d'exemple
+  const vehicleModels = await Promise.all([
+    prisma.vehicleModel.upsert({
+      where: { name: 'BMW X5' },
+      update: {},
+      create: {
+        name: 'BMW X5',
+        vehicleTypeId: vehicleTypes[0].id,
+      },
+    }),
+    prisma.vehicleModel.upsert({
+      where: { name: 'Mercedes Classe A' },
+      update: {},
+      create: {
+        name: 'Mercedes Classe A',
+        vehicleTypeId: vehicleTypes[0].id,
+      },
+    }),
+    prisma.vehicleModel.upsert({
+      where: { name: 'Audi A4' },
+      update: {},
+      create: {
+        name: 'Audi A4',
+        vehicleTypeId: vehicleTypes[0].id,
+      },
+    }),
+    prisma.vehicleModel.upsert({
+      where: { name: 'Honda CBR' },
+      update: {},
+      create: {
+        name: 'Honda CBR',
+        vehicleTypeId: vehicleTypes[1].id,
+      },
+    }),
+    prisma.vehicleModel.upsert({
+      where: { name: 'Yamaha R1' },
+      update: {},
+      create: {
+        name: 'Yamaha R1',
+        vehicleTypeId: vehicleTypes[1].id,
+      },
+    }),
+  ])
+
   // Créer quelques véhicules d'exemple
   const vehicles = await Promise.all([
     prisma.vehicle.create({
@@ -84,6 +128,7 @@ async function main() {
         reportNumber: 'RPT-2024-001',
         groupusculeId: groupuscules[0].id,
         vehicleTypeId: vehicleTypes[0].id,
+        vehicleModelId: vehicleModels[0].id,
       },
     }),
     prisma.vehicle.create({
@@ -94,6 +139,7 @@ async function main() {
         reportNumber: 'RPT-2024-002',
         groupusculeId: groupuscules[1].id,
         vehicleTypeId: vehicleTypes[0].id,
+        vehicleModelId: vehicleModels[1].id,
       },
     }),
     prisma.vehicle.create({
@@ -104,6 +150,18 @@ async function main() {
         reportNumber: 'RPT-2024-003',
         groupusculeId: groupuscules[2].id,
         vehicleTypeId: vehicleTypes[0].id,
+        vehicleModelId: vehicleModels[2].id,
+      },
+    }),
+    prisma.vehicle.create({
+      data: {
+        model: 'Honda CBR',
+        licensePlate: 'MOTO-001',
+        ownerName: 'Sophie Leroy',
+        reportNumber: 'RPT-2024-004',
+        groupusculeId: null, // Pas de groupuscule
+        vehicleTypeId: vehicleTypes[1].id,
+        vehicleModelId: vehicleModels[3].id,
       },
     }),
   ])
@@ -112,6 +170,7 @@ async function main() {
   console.log('Utilisateur admin créé:', admin.email)
   console.log('Groupuscules créés:', groupuscules.length)
   console.log('Types de véhicules créés:', vehicleTypes.length)
+  console.log('Modèles de véhicules créés:', vehicleModels.length)
   console.log('Véhicules créés:', vehicles.length)
 }
 

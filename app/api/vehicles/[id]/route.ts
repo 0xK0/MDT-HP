@@ -12,7 +12,8 @@ export async function GET(
       where: { id },
       include: {
         groupuscule: true,
-        vehicleType: true
+        vehicleType: true,
+        vehicleModel: true
       }
     })
 
@@ -42,12 +43,14 @@ export async function PUT(
         licensePlate: data.licensePlate,
         ownerName: data.ownerName,
         reportNumber: data.reportNumber,
-        groupusculeId: data.groupusculeId,
+        groupusculeId: data.groupusculeId || null,
         vehicleTypeId: data.vehicleTypeId || null,
+        vehicleModelId: data.vehicleModelId || null,
       },
       include: {
         groupuscule: true,
-        vehicleType: true
+        vehicleType: true,
+        vehicleModel: true
       }
     })
 

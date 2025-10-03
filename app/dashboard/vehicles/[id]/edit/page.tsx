@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { VehicleModelSelect } from '@/components/VehicleModelSelect'
+import { GroupusculeSelect } from '@/components/GroupusculeSelect'
 
 export default function EditVehiclePage({ params }: { params: Promise<{ id: string }> }) {
   const [vehicle, setVehicle] = useState<any>(null)
   const [groupuscules, setGroupuscules] = useState<any[]>([])
   const [vehicleTypes, setVehicleTypes] = useState<any[]>([])
+  const [hasGroupuscule, setHasGroupuscule] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const router = useRouter()
@@ -22,6 +25,7 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
         if (vehicleResponse.ok) {
           const vehicleData = await vehicleResponse.json()
           setVehicle(vehicleData)
+          setHasGroupuscule(!!vehicleData.groupusculeId)
         }
 
         // Charger les groupuscules
@@ -53,7 +57,10 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(vehicle),
+        body: JSON.stringify({
+          ...vehicle,
+          groupusculeId: hasGroupuscule ? vehicle.groupusculeId : null
+        }),
       })
 
       if (response.ok) {
@@ -93,12 +100,11 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Modèle du véhicule
               </label>
-              <input
-                type="text"
-                value={vehicle?.model || ''}
-                onChange={(e) => setVehicle({ ...vehicle, model: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                placeholder="Modèle du véhicule"
+              <VehicleModelSelect
+                value={vehicle?.vehicleModelId || ''}
+                onChange={(value) => setVehicle({ ...vehicle, vehicleModelId: value })}
+                vehicleTypeId={vehicle?.vehicleTypeId}
+                placeholder="Sélectionner un modèle..."
               />
             </div>
 
@@ -159,22 +165,17 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
               </select>
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Groupuscule
+                Appartenance
               </label>
-              <select 
+              <GroupusculeSelect
                 value={vehicle?.groupusculeId || ''}
-                onChange={(e) => setVehicle({ ...vehicle, groupusculeId: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-              >
-                <option value="">Sélectionner un groupuscule</option>
-                {groupuscules.map((groupuscule) => (
-                  <option key={groupuscule.id} value={groupuscule.id}>
-                    {groupuscule.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => setVehicle({ ...vehicle, groupusculeId: value })}
+                hasGroupuscule={hasGroupuscule}
+                onHasGroupusculeChange={setHasGroupuscule}
+                placeholder="Sélectionner un groupuscule..."
+              />
             </div>
           </div>
 

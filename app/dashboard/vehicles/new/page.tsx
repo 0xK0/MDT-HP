@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { prisma } from "@/lib/prisma"
+import { ArrowLeft } from "lucide-react"
+import { VehicleModelSelect } from '@/components/VehicleModelSelect'
+import { GroupusculeSelect } from '@/components/GroupusculeSelect'
 
 export default function NewVehiclePage() {
   const [formData, setFormData] = useState({
@@ -11,16 +13,34 @@ export default function NewVehiclePage() {
     ownerName: "",
     reportNumber: "",
     groupusculeId: "",
+    vehicleTypeId: "",
+    vehicleModelId: "",
   })
-  const [groupuscules, setGroupuscules] = useState([])
+  const [groupuscules, setGroupuscules] = useState<any[]>([])
+  const [vehicleTypes, setVehicleTypes] = useState<any[]>([])
+  const [hasGroupuscule, setHasGroupuscule] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // Charger les groupuscules au montage du composant
+  // Charger les données au montage du composant
   useEffect(() => {
-    fetch("/api/groupuscules")
-      .then(res => res.json())
-      .then(data => setGroupuscules(data))
+    const loadData = async () => {
+      try {
+        // Charger les groupuscules
+        const groupusculesResponse = await fetch('/api/groupuscules')
+        const groupusculesData = await groupusculesResponse.json()
+        setGroupuscules(groupusculesData)
+
+        // Charger les types de véhicules
+        const typesResponse = await fetch('/api/vehicle-types')
+        const typesData = await typesResponse.json()
+        setVehicleTypes(typesData)
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error)
+      }
+    }
+
+    loadData()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,140 +53,141 @@ export default function NewVehiclePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          groupusculeId: hasGroupuscule ? formData.groupusculeId : null
+        }),
       })
 
       if (response.ok) {
         router.push("/dashboard/vehicles")
       } else {
-        console.error("Erreur lors de la création du véhicule")
+        const errorData = await response.json()
+        alert(`Erreur: ${errorData.error}`)
       }
     } catch (error) {
-      console.error("Erreur:", error)
+      console.error("Erreur lors de la création:", error)
+      alert("Une erreur est survenue lors de la création du véhicule")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
-
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white">Nouveau véhicule</h1>
-        <p className="text-gray-400 mt-2">
-          Enregistrer un nouveau véhicule dans le système
-        </p>
+      <div className="flex items-center mb-6">
+        <button
+          onClick={() => router.back()}
+          className="mr-4 p-2 hover:bg-gray-700 rounded"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <h1 className="text-3xl font-bold text-white">Nouveau Véhicule</h1>
       </div>
 
       <div className="bg-gray-800 rounded-lg p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="model" className="block text-sm font-medium text-gray-300 mb-2">
-                Modèle du véhicule *
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Modèle du véhicule
               </label>
-              <input
-                type="text"
-                id="model"
-                name="model"
-                required
-                value={formData.model}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ex: BMW X5, Mercedes Classe A..."
+              <VehicleModelSelect
+                value={formData.vehicleModelId}
+                onChange={(value) => setFormData({ ...formData, vehicleModelId: value })}
+                vehicleTypeId={formData.vehicleTypeId}
+                placeholder="Sélectionner un modèle..."
               />
             </div>
 
             <div>
-              <label htmlFor="licensePlate" className="block text-sm font-medium text-gray-300 mb-2">
-                Plaque d'immatriculation *
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Plaque d'immatriculation
               </label>
               <input
                 type="text"
-                id="licensePlate"
-                name="licensePlate"
-                required
                 value={formData.licensePlate}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ex: AB-123-CD"
+                onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                placeholder="Plaque d'immatriculation"
+                required
               />
             </div>
 
             <div>
-              <label htmlFor="ownerName" className="block text-sm font-medium text-gray-300 mb-2">
-                Nom du propriétaire *
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Nom du propriétaire
               </label>
               <input
                 type="text"
-                id="ownerName"
-                name="ownerName"
-                required
                 value={formData.ownerName}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ex: Jean Dupont"
+                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                placeholder="Nom du propriétaire"
+                required
               />
             </div>
 
             <div>
-              <label htmlFor="reportNumber" className="block text-sm font-medium text-gray-300 mb-2">
-                N° de rapport associé *
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                N° de rapport associé
               </label>
               <input
                 type="text"
-                id="reportNumber"
-                name="reportNumber"
-                required
                 value={formData.reportNumber}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ex: RPT-2024-001"
+                onChange={(e) => setFormData({ ...formData, reportNumber: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                placeholder="N° de rapport associé"
+                required
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label htmlFor="groupusculeId" className="block text-sm font-medium text-gray-300 mb-2">
-                Appartenance (Groupuscule) *
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Type de véhicule
               </label>
-              <select
-                id="groupusculeId"
-                name="groupusculeId"
-                required
-                value={formData.groupusculeId}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              <select 
+                value={formData.vehicleTypeId}
+                onChange={(e) => setFormData({ ...formData, vehicleTypeId: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
               >
-                <option value="">Sélectionner un groupuscule</option>
-                {groupuscules.map((groupuscule: any) => (
-                  <option key={groupuscule.id} value={groupuscule.id}>
-                    {groupuscule.name}
+                <option value="">Sélectionner un type</option>
+                {vehicleTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
                   </option>
                 ))}
               </select>
             </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Appartenance
+              </label>
+              <GroupusculeSelect
+                value={formData.groupusculeId}
+                onChange={(value) => setFormData({ ...formData, groupusculeId: value })}
+                hasGroupuscule={hasGroupuscule}
+                onHasGroupusculeChange={setHasGroupuscule}
+                placeholder="Sélectionner un groupuscule..."
+              />
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Annuler
-            </button>
+          <div className="flex space-x-4">
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
             >
-              {loading ? "Enregistrement..." : "Enregistrer"}
+              {loading ? "Création..." : "Créer le véhicule"}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
+            >
+              Annuler
             </button>
           </div>
         </form>

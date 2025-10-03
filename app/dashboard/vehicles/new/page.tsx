@@ -12,6 +12,7 @@ export default function NewVehiclePage() {
     licensePlate: "",
     ownerName: "",
     reportNumber: "",
+    photoProofDate: "",
     groupusculeId: "",
     vehicleTypeId: "",
   })
@@ -105,7 +106,7 @@ export default function NewVehiclePage() {
               <input
                 type="text"
                 value={formData.licensePlate}
-                onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value.toUpperCase() })}
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                 placeholder="Plaque d'immatriculation"
                 required
@@ -140,6 +141,18 @@ export default function NewVehiclePage() {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Date photo preuve
+              </label>
+              <input
+                type="text"
+                value={formData.photoProofDate}
+                onChange={(e) => setFormData({ ...formData, photoProofDate: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                placeholder="Date photo preuve (optionnel)"
+              />
+            </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">

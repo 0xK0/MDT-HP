@@ -114,7 +114,7 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
               <input
                 type="text"
                 value={vehicle?.licensePlate || ''}
-                onChange={(e) => setVehicle({ ...vehicle, licensePlate: e.target.value })}
+                onChange={(e) => setVehicle({ ...vehicle, licensePlate: e.target.value.toUpperCase() })}
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                 placeholder="Plaque d'immatriculation"
               />
@@ -146,6 +146,18 @@ export default function EditVehiclePage({ params }: { params: Promise<{ id: stri
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Date photo preuve
+              </label>
+              <input
+                type="text"
+                value={vehicle?.photoProofDate || ''}
+                onChange={(e) => setVehicle({ ...vehicle, photoProofDate: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                placeholder="Date photo preuve (optionnel)"
+              />
+            </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">

@@ -67,6 +67,7 @@ model Vehicle {
   licensePlate    String
   ownerName       String
   reportNumber    String
+  photoProofDate  String?
   groupusculeId   String?     @db.ObjectId
   vehicleTypeId   String?     @db.ObjectId
   vehicleModelId  String?     @db.ObjectId

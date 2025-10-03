@@ -39,9 +39,10 @@ export async function PUT(
       where: { id },
       data: {
         model: data.model,
-        licensePlate: data.licensePlate,
+        licensePlate: data.licensePlate ? data.licensePlate.toUpperCase() : data.licensePlate,
         ownerName: data.ownerName,
         reportNumber: data.reportNumber,
+        photoProofDate: data.photoProofDate || null,
         groupusculeId: data.groupusculeId || null,
         vehicleTypeId: data.vehicleTypeId || null,
       },

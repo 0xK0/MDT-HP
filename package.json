@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "npm run db:generate && next build --turbopack",
     "start": "next start",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -14,7 +14,8 @@
     "schema:verify": "tsx scripts/verify-schema.ts",
     "deploy": "vercel --prod",
     "deploy:setup": "vercel login && vercel link",
-    "deploy:auto": "npm run db:generate && npm run build && vercel --prod"
+    "deploy:auto": "npm run db:generate && npm run build && vercel --prod",
+    "deploy:clean": "bash scripts/clean-deploy.sh && vercel --prod"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",

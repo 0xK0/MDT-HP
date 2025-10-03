@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -12,9 +12,13 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     // Charger les données de l'utilisateur
-    // Pour l'instant, on affiche un formulaire vide
-    setLoading(false)
-  }, [])
+    const loadUser = async () => {
+      const resolvedParams = await params
+      // Pour l'instant, on affiche un formulaire vide
+      setLoading(false)
+    }
+    loadUser()
+  }, [params])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

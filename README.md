@@ -88,6 +88,22 @@ Le projet utilise MongoDB avec Prisma ORM. MongoDB est :
 - ✅ **Fiable** : Haute disponibilité et sauvegarde automatique
 - ✅ **Compatible Vercel** : Fonctionne parfaitement en production
 
+### Scripts Disponibles
+
+```bash
+# Développement
+npm run dev
+
+# Base de données
+npm run db:generate  # Générer le client Prisma
+npm run db:push      # Appliquer le schéma à MongoDB
+npm run db:seed      # Peupler la base de données
+
+# Déploiement
+npm run deploy       # Déployer sur Vercel
+npm run deploy:auto  # Build et déployer automatiquement
+```
+
 ## Déploiement sur Vercel
 
 1. **Connecter votre repository à Vercel**

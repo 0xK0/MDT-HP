@@ -43,8 +43,6 @@ next-env.d.ts
 # prisma
 /app/generated/prisma
 
-# database files
-*.db
-*.db-journal
+# database files (MongoDB - no local files)
 
 .vercel

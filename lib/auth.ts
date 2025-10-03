@@ -13,34 +13,49 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log("NextAuth authorize appelé avec:", { email: credentials?.email, hasPassword: !!credentials?.password })
+        
         if (!credentials?.email || !credentials?.password) {
+          console.log("Credentials manquants")
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          })
+
+          console.log("Utilisateur trouvé:", user ? { id: user.id, email: user.email, name: user.name } : "Aucun utilisateur")
+
+          if (!user) {
+            console.log("Utilisateur non trouvé pour l'email:", credentials.email)
+            return null
           }
-        })
 
-        if (!user) {
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          )
+
+          console.log("Mot de passe valide:", isPasswordValid)
+
+          if (!isPasswordValid) {
+            console.log("Mot de passe incorrect pour l'utilisateur:", user.email)
+            return null
+          }
+
+          console.log("Authentification réussie pour:", user.email)
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
+        } catch (error) {
+          console.error("Erreur lors de l'authentification:", error)
           return null
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
-
-        if (!isPasswordValid) {
-          return null
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
         }
       }
     })

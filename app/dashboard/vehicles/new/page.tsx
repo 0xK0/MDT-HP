@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
-import { VehicleModelSelect } from '@/components/VehicleModelSelect'
+import { VehicleTypeSelect } from '@/components/VehicleModelSelect'
 import { GroupusculeSelect } from '@/components/GroupusculeSelect'
 import { OwnerSelect } from '@/components/OwnerSelect'
 
@@ -93,7 +93,7 @@ export default function NewVehiclePage() {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Type de véhicule
               </label>
-              <VehicleModelSelect
+              <VehicleTypeSelect
                 value={formData.vehicleTypeId}
                 onChange={(value) => setFormData({ ...formData, vehicleTypeId: value })}
                 placeholder="Sélectionner un type de véhicule..."

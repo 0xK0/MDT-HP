@@ -9,17 +9,17 @@ interface VehicleType {
   description?: string
 }
 
-interface VehicleModelSelectProps {
+interface VehicleTypeSelectProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
 }
 
-export function VehicleModelSelect({ 
+export function VehicleTypeSelect({ 
   value, 
   onChange, 
   placeholder = "Sélectionner un type de véhicule..." 
-}: VehicleModelSelectProps) {
+}: VehicleTypeSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([])

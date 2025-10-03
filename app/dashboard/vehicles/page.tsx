@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { Plus, Eye, Edit, Trash2 } from "lucide-react"
+import { Plus } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { ActionButtons } from "@/components/ActionButtons"
 
 export const dynamic = 'force-dynamic'
 
@@ -90,17 +91,7 @@ export default async function VehiclesPage() {
                     {new Date(vehicle.createdAt).toLocaleDateString("fr-FR")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-blue-400 hover:text-blue-300">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="text-yellow-400 hover:text-yellow-300">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="text-red-400 hover:text-red-300">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <ActionButtons id={vehicle.id} type="vehicle" onView={() => {}} />
                   </td>
                 </tr>
               ))}

@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { Plus, Edit, Trash2, Shield, User } from "lucide-react"
+import { Plus, Shield, User } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { ActionButtons } from "@/components/ActionButtons"
 
 export const dynamic = 'force-dynamic'
 
@@ -99,14 +100,7 @@ export default async function UsersPage() {
                       {new Date(user.createdAt).toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button className="text-yellow-400 hover:text-yellow-300">
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button className="text-red-400 hover:text-red-300">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <ActionButtons id={user.id} type="user" />
                     </td>
                   </tr>
                 )

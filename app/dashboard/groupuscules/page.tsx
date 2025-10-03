@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { Plus, Edit, Trash2, Users } from "lucide-react"
+import { Plus, Users } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { ActionButtons } from "@/components/ActionButtons"
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,7 @@ export default async function GroupusculesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {groupuscules.map((groupuscule) => (
+        {groupuscules.map((groupuscule: any) => (
           <div key={groupuscule.id} className="bg-gray-800 rounded-lg p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -60,13 +61,8 @@ export default async function GroupusculesPage() {
                   {groupuscule._count.vehicles} véhicule(s) associé(s)
                 </div>
               </div>
-              <div className="flex space-x-2 ml-4">
-                <button className="text-yellow-400 hover:text-yellow-300">
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button className="text-red-400 hover:text-red-300">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+              <div className="ml-4">
+                <ActionButtons id={groupuscule.id} type="groupuscule" />
               </div>
             </div>
           </div>

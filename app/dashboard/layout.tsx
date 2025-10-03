@@ -1,6 +1,5 @@
 "use client"
 
-import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -16,22 +15,49 @@ import {
   Building2
 } from "lucide-react"
 
+interface User {
+  id: string
+  code: string
+  type: 'ADMIN' | 'USER'
+  name: string
+  role: 'ADMIN' | 'USER'
+}
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { data: session, status } = useSession()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    // Vérifier si l'utilisateur est connecté via localStorage
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        setUser(userData)
+      } catch (error) {
+        console.error('Erreur lors du parsing des données utilisateur:', error)
+        localStorage.removeItem('user')
+        router.push("/login")
+      }
+    } else {
       router.push("/login")
     }
-  }, [status, router])
+    setLoading(false)
+  }, [router])
 
-  if (status === "loading") {
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    setUser(null)
+    router.push("/login")
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="text-white">Chargement...</div>
@@ -39,7 +65,7 @@ export default function DashboardLayout({
     )
   }
 
-  if (!session) {
+  if (!user) {
     return null
   }
 
@@ -47,7 +73,7 @@ export default function DashboardLayout({
     { name: "Véhicules", href: "/dashboard/vehicles", icon: Car },
     { name: "Types de Véhicules", href: "/dashboard/vehicle-types", icon: Car },
     { name: "Groupuscules", href: "/dashboard/groupuscules", icon: Building2 },
-    ...(session.user.role === "ADMIN" ? [{ name: "Utilisateurs", href: "/dashboard/users", icon: Users }] : []),
+    ...(user.role === "ADMIN" ? [{ name: "Utilisateurs", href: "/dashboard/users", icon: Users }] : []),
   ]
 
   return (
@@ -83,17 +109,17 @@ export default function DashboardLayout({
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
-                    {session.user.name?.charAt(0).toUpperCase()}
+                    {user.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-white">{session.user.name}</p>
-                <p className="text-xs text-gray-400">{session.user.role}</p>
+                <p className="text-sm font-medium text-white">{user.name}</p>
+                <p className="text-xs text-gray-400">{user.role}</p>
               </div>
             </div>
             <button
-              onClick={() => signOut()}
+              onClick={() => handleLogout()}
               className="mt-3 flex items-center text-sm text-gray-400 hover:text-white"
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -126,17 +152,17 @@ export default function DashboardLayout({
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
-                    {session.user.name?.charAt(0).toUpperCase()}
+                    {user.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-white">{session.user.name}</p>
-                <p className="text-xs text-gray-400">{session.user.role}</p>
+                <p className="text-sm font-medium text-white">{user.name}</p>
+                <p className="text-xs text-gray-400">{user.role}</p>
               </div>
             </div>
             <button
-              onClick={() => signOut()}
+              onClick={() => handleLogout()}
               className="mt-3 flex items-center text-sm text-gray-400 hover:text-white"
             >
               <LogOut className="mr-2 h-4 w-4" />

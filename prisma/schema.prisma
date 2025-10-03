@@ -72,6 +72,18 @@ model Owner {
   @@map("owners")
 }
 
+model PinCode {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String   @unique
+  type      PinType  @default(USER)
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("pin_codes")
+}
+
 model Vehicle {
   id              String      @id @default(auto()) @map("_id") @db.ObjectId
   model           String
@@ -95,6 +107,11 @@ model Vehicle {
 }
 
 enum UserRole {
+  ADMIN
+  USER
+}
+
+enum PinType {
   ADMIN
   USER
 }

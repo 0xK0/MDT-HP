@@ -1,22 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Créer un utilisateur admin par défaut
-  const hashedPassword = await bcrypt.hash('admin123', 12)
-  
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@mdt-hp.com' },
-    update: {},
-    create: {
-      email: 'admin@mdt-hp.com',
-      password: hashedPassword,
-      name: 'Administrateur',
-      role: 'ADMIN',
-    },
-  })
+  // Les utilisateurs sont maintenant gérés via des codes PIN
 
   // Créer quelques groupuscules d'exemple
   const groupuscules = await Promise.all([
@@ -118,6 +105,30 @@ async function main() {
     }),
   ])
 
+  // Créer des codes PIN par défaut
+  const pinCodes = await Promise.all([
+    prisma.pinCode.upsert({
+      where: { code: '123456' },
+      update: {},
+      create: {
+        code: '123456',
+        type: 'ADMIN',
+        name: 'Administrateur Principal',
+      },
+    }),
+    prisma.pinCode.upsert({
+      where: { code: '000000' },
+      update: {},
+      create: {
+        code: '000000',
+        type: 'USER',
+        name: 'Utilisateur Standard',
+      },
+    }),
+  ])
+
+  console.log('Codes PIN créés:', pinCodes.length)
+
   // Créer quelques véhicules d'exemple
   const vehicles = await Promise.all([
     prisma.vehicle.create({
@@ -167,7 +178,7 @@ async function main() {
   ])
 
   console.log('Seed terminé avec succès!')
-  console.log('Utilisateur admin créé:', admin.email)
+  console.log('Codes PIN créés:', pinCodes.length)
   console.log('Groupuscules créés:', groupuscules.length)
   console.log('Types de véhicules créés:', vehicleTypes.length)
   console.log('Modèles de véhicules créés:', vehicleModels.length)

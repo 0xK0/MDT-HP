@@ -92,7 +92,7 @@ export default function DashboardLayout({
               <X className="h-6 w-6" />
             </button>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4">
+          <nav className="flex-1 space-y-3 px-2 py-10">
             {navigation.map((item) => (
               <Link
                 key={item.name}

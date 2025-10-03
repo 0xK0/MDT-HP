@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Edit, Trash2, Eye } from 'lucide-react'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface ActionButtonsProps {
   id: string
@@ -14,14 +15,17 @@ interface ActionButtonsProps {
 
 export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView }: ActionButtonsProps) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const router = useRouter()
 
-  const handleDelete = async () => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) {
-      return
-    }
+  const handleDeleteClick = () => {
+    setShowConfirmDialog(true)
+  }
 
+  const handleConfirmDelete = async () => {
     setIsDeleting(true)
+    setShowConfirmDialog(false)
+    
     try {
       const apiPath = type === 'vehicle-type' ? 'vehicle-types' : `${type}s`
       const response = await fetch(`/api/${apiPath}/${id}`, {
@@ -39,6 +43,10 @@ export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView }: A
     } finally {
       setIsDeleting(false)
     }
+  }
+
+  const handleCancelDelete = () => {
+    setShowConfirmDialog(false)
   }
 
   const handleEdit = () => {
@@ -79,7 +87,7 @@ export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView }: A
       </button>
       {userRole === 'ADMIN' && (
         <button
-          onClick={handleDelete}
+          onClick={handleDeleteClick}
           disabled={isDeleting}
           className="text-red-400 hover:text-red-300 disabled:opacity-50"
           title="Supprimer"
@@ -87,6 +95,17 @@ export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView }: A
           <Trash2 className="h-4 w-4" />
         </button>
       )}
+      
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Confirmer la suppression"
+        message={`Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.`}
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        isLoading={isDeleting}
+      />
     </div>
   )
 }

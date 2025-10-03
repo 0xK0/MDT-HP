@@ -11,9 +11,10 @@ interface ActionButtonsProps {
   userRole?: 'ADMIN' | 'USER'
   onEdit?: () => void
   onView?: () => void
+  onDelete?: () => void
 }
 
-export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView }: ActionButtonsProps) {
+export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView, onDelete }: ActionButtonsProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const router = useRouter()
@@ -33,7 +34,11 @@ export function ActionButtons({ id, type, userRole = 'USER', onEdit, onView }: A
       })
 
       if (response.ok) {
-        router.refresh()
+        if (onDelete) {
+          onDelete()
+        } else {
+          router.refresh()
+        }
       } else {
         const error = await response.json()
         alert('Erreur: ' + error.error)

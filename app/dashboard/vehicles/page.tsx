@@ -80,6 +80,29 @@ export default function VehiclesPage() {
     setShowEditModal(true)
   }
 
+  const handleDeleteVehicle = async () => {
+    // Recharger les véhicules après suppression
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        ...(searchTerm && { search: searchTerm })
+      })
+      
+      const response = await fetch(`/api/vehicles?${params}`)
+      const data = await response.json()
+      
+      if (data.vehicles && data.pagination) {
+        setVehicles(data.vehicles)
+        setPagination(data.pagination)
+      } else {
+        setVehicles(Array.isArray(data) ? data : [])
+      }
+    } catch (error) {
+      console.error('Erreur lors du rechargement des véhicules:', error)
+    }
+  }
+
   const handleSave = (updatedVehicle: any) => {
     setVehicles(prev => prev.map(v => v.id === updatedVehicle.id ? updatedVehicle : v))
   }
@@ -316,6 +339,7 @@ export default function VehiclesPage() {
                           id={vehicle.id} 
                           type="vehicle" 
                           onEdit={() => handleEdit(vehicle)}
+                          onDelete={handleDeleteVehicle}
                         />
                         <button
                           onClick={() => handleAddFact(vehicle)}

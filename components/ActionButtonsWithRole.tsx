@@ -8,9 +8,10 @@ interface ActionButtonsWithRoleProps {
   type: 'user' | 'groupuscule' | 'vehicle' | 'vehicle-type'
   onEdit?: () => void
   onView?: () => void
+  onDelete?: () => void
 }
 
-export function ActionButtonsWithRole({ id, type, onEdit, onView }: ActionButtonsWithRoleProps) {
+export function ActionButtonsWithRole({ id, type, onEdit, onView, onDelete }: ActionButtonsWithRoleProps) {
   const [userRole, setUserRole] = useState<'ADMIN' | 'USER'>('USER')
 
   useEffect(() => {
@@ -34,6 +35,7 @@ export function ActionButtonsWithRole({ id, type, onEdit, onView }: ActionButton
       userRole={userRole}
       onEdit={onEdit}
       onView={onView}
+      onDelete={onDelete}
     />
   )
 }

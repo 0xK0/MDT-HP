@@ -1,10 +1,23 @@
 import Link from "next/link"
 import { Plus, Edit, Trash2, Shield, User } from "lucide-react"
+import { prisma } from "@/lib/prisma"
 
 export const dynamic = 'force-dynamic'
 
-export default function UsersPage() {
-  const users: any[] = []
+async function getUsers() {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' }
+    })
+    return users
+  } catch (error) {
+    console.error('Erreur lors de la récupération des utilisateurs:', error)
+    return []
+  }
+}
+
+export default async function UsersPage() {
+  const users = await getUsers()
 
   const getRoleIcon = (role: string) => {
     return role === "ADMIN" ? Shield : User

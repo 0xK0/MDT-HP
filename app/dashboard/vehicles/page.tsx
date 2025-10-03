@@ -1,10 +1,26 @@
 import Link from "next/link"
 import { Plus, Eye, Edit, Trash2 } from "lucide-react"
+import { prisma } from "@/lib/prisma"
 
 export const dynamic = 'force-dynamic'
 
-export default function VehiclesPage() {
-  const vehicles: any[] = []
+async function getVehicles() {
+  try {
+    const vehicles = await prisma.vehicle.findMany({
+      include: {
+        groupuscule: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    return vehicles
+  } catch (error) {
+    console.error('Erreur lors de la récupération des véhicules:', error)
+    return []
+  }
+}
+
+export default async function VehiclesPage() {
+  const vehicles = await getVehicles()
 
   return (
     <div className="p-6">
@@ -53,7 +69,7 @@ export default function VehiclesPage() {
               </tr>
             </thead>
             <tbody className="bg-gray-800 divide-y divide-gray-700">
-              {vehicles.map((vehicle) => (
+              {vehicles.map((vehicle: any) => (
                 <tr key={vehicle.id} className="hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {vehicle.model}

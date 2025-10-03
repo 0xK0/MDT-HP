@@ -1,41 +1,46 @@
+"use client"
+
 import Link from "next/link"
 import { Plus, Search } from "lucide-react"
-import { prisma } from "@/lib/prisma"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { ActionButtonsWithRole } from "@/components/ActionButtonsWithRole"
 import { VehicleSearch } from "@/components/VehicleSearch"
+import { VehicleEditModal } from "@/components/VehicleEditModal"
 
-export const dynamic = 'force-dynamic'
+export default function DashboardPage() {
+  const searchParams = useSearchParams()
+  const searchTerm = searchParams.get('search')
+  const [vehicles, setVehicles] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingVehicle, setEditingVehicle] = useState<any>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
-async function getVehicles(searchTerm?: string) {
-  try {
-    const where = searchTerm ? {
-      OR: [
-        { model: { contains: searchTerm, mode: 'insensitive' as const } },
-        { licensePlate: { contains: searchTerm, mode: 'insensitive' as const } },
-        { ownerName: { contains: searchTerm, mode: 'insensitive' as const } },
-        { groupuscule: { name: { contains: searchTerm, mode: 'insensitive' as const } } }
-      ]
-    } : {}
+  useEffect(() => {
+    const loadVehicles = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(`/api/vehicles${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : ''}`)
+        const data = await response.json()
+        setVehicles(data)
+      } catch (error) {
+        console.error('Erreur lors de la récupération des véhicules:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    const vehicles = await prisma.vehicle.findMany({
-      where,
-      include: {
-        groupuscule: true,
-        vehicleType: true,
-        owner: true
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-    return vehicles
-  } catch (error) {
-    console.error('Erreur lors de la récupération des véhicules:', error)
-    return []
+    loadVehicles()
+  }, [searchTerm])
+
+  const handleEdit = (vehicle: any) => {
+    setEditingVehicle(vehicle)
+    setShowEditModal(true)
   }
-}
 
-export default async function DashboardPage({ searchParams }: { searchParams: { search?: string } }) {
-  const searchTerm = searchParams.search
-  const vehicles = await getVehicles(searchTerm)
+  const handleSave = (updatedVehicle: any) => {
+    setVehicles(prev => prev.map(v => v.id === updatedVehicle.id ? updatedVehicle : v))
+  }
 
   return (
     <div className="p-6">
@@ -64,9 +69,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           <table className="min-w-full divide-y divide-gray-700">
             <thead className="bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Modèle
-                    </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Type
+                </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Plaque
                     </th>
@@ -94,7 +99,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
               {vehicles.map((vehicle: any) => (
                 <tr key={vehicle.id} className="hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                    {vehicle.vehicleType?.name || vehicle.model || '-'}
+                    {vehicle.vehicleType?.name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {vehicle.licensePlate}
@@ -114,9 +119,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {new Date(vehicle.createdAt).toLocaleDateString("fr-FR")}
                   </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <ActionButtonsWithRole id={vehicle.id} type="vehicle" />
-                      </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <ActionButtonsWithRole 
+                      id={vehicle.id} 
+                      type="vehicle" 
+                      onEdit={() => handleEdit(vehicle)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -128,6 +137,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           </div>
         )}
       </div>
+
+      {/* Pop-up d'édition */}
+      <VehicleEditModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        vehicle={editingVehicle}
+        onSave={handleSave}
+      />
     </div>
   )
 }

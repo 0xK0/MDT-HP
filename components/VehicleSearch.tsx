@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, X } from 'lucide-react'
 
@@ -9,13 +9,22 @@ export function VehicleSearch() {
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
 
+  // Recherche automatique avec debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const params = new URLSearchParams()
+      if (searchTerm.trim()) {
+        params.set('search', searchTerm.trim())
+      }
+      router.push(`/dashboard/vehicles?${params.toString()}`)
+    }, 500) // Délai de 500ms
+
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm, router])
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    const params = new URLSearchParams()
-    if (searchTerm.trim()) {
-      params.set('search', searchTerm.trim())
-    }
-    router.push(`/dashboard/vehicles?${params.toString()}`)
+    // La recherche se fait automatiquement via useEffect
   }
 
   const clearSearch = () => {

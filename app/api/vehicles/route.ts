@@ -24,6 +24,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { model, licensePlate, ownerName, reportNumber, photoProofDate, groupusculeId, vehicleTypeId } = body
 
+    // Validation des champs requis
+    if (!licensePlate || !ownerName) {
+      return NextResponse.json({ error: 'La plaque et le propriétaire sont requis' }, { status: 400 })
+    }
+
+    // Validation : au moins un des deux champs requis
+    if (!reportNumber && !photoProofDate) {
+      return NextResponse.json({ error: 'Veuillez renseigner au moins le numéro de dossier ou la date photo preuve' }, { status: 400 })
+    }
+
     // Trouver ou créer le propriétaire
     let owner = await prisma.owner.findUnique({
       where: { name: ownerName }
@@ -37,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     const vehicle = await prisma.vehicle.create({
       data: {
-        model,
+        model: "", // Champ vide par défaut
         licensePlate: licensePlate.toUpperCase(), // Conversion automatique en majuscules
         ownerName,
         ownerId: owner.id,

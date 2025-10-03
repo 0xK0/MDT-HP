@@ -36,6 +36,16 @@ export async function PUT(
     const { id } = await params
     const data = await request.json()
 
+    // Validation des champs requis
+    if (!data.licensePlate || !data.ownerName) {
+      return NextResponse.json({ error: 'La plaque et le propriétaire sont requis' }, { status: 400 })
+    }
+
+    // Validation : au moins un des deux champs requis
+    if (!data.reportNumber && !data.photoProofDate) {
+      return NextResponse.json({ error: 'Veuillez renseigner au moins le numéro de dossier ou la date photo preuve' }, { status: 400 })
+    }
+
     // Trouver ou créer le propriétaire
     let owner = null
     if (data.ownerName) {
@@ -53,7 +63,7 @@ export async function PUT(
     const vehicle = await prisma.vehicle.update({
       where: { id },
       data: {
-        model: data.model,
+        model: "", // Champ vide par défaut
         licensePlate: data.licensePlate ? data.licensePlate.toUpperCase() : data.licensePlate,
         ownerName: data.ownerName,
         ownerId: owner?.id || null,

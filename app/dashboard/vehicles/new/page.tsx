@@ -10,7 +10,6 @@ import { VehicleTypeSelect } from '@/components/VehicleTypeSelect'
 
 export default function NewVehiclePage() {
   const [formData, setFormData] = useState({
-    model: "",
     licensePlate: "",
     ownerName: "",
     reportNumber: "",

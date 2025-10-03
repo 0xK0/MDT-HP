@@ -113,6 +113,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center">
+          <div className="mb-6">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="mx-auto h-20 w-auto"
+            />
+          </div>
           <h2 className="mt-6 text-3xl font-bold text-white">
             Connexion
           </h2>

@@ -83,7 +83,14 @@ export default function DashboardLayout({
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-gray-800">
           <div className="flex h-16 items-center justify-between px-4">
-            <h1 className="text-xl font-bold text-white">MDT-HP</h1>
+            <div className="flex items-center">
+              <img 
+                src="/logo.png" 
+                alt="Logo" 
+                className="h-8 w-auto mr-2"
+              />
+              <h1 className="text-xl font-bold text-white">MDT-HP</h1>
+            </div>
             <button
               onClick={() => setSidebarOpen(false)}
               className="text-gray-400 hover:text-white"
@@ -133,6 +140,11 @@ export default function DashboardLayout({
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-gray-800 pt-5 pb-4 overflow-y-auto">
           <div className="flex items-center flex-shrink-0 px-4">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="h-8 w-auto mr-2"
+            />
             <h1 className="text-xl font-bold text-white">MDT-HP</h1>
           </div>
           <nav className="mt-5 flex-1 px-2 space-y-1">
@@ -174,7 +186,15 @@ export default function DashboardLayout({
 
       {/* Main content */}
       <div className="lg:pl-64 flex flex-col flex-1">
-        <div className="sticky top-0 z-10 lg:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-gray-900">
+        <div className="sticky top-0 z-10 lg:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-gray-900 flex items-center justify-between">
+          <div className="flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="h-8 w-auto mr-2"
+            />
+            <h1 className="text-lg font-bold text-white">MDT-HP</h1>
+          </div>
           <button
             type="button"
             className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"

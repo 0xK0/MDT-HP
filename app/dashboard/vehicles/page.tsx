@@ -90,9 +90,9 @@ export default async function VehiclesPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {new Date(vehicle.createdAt).toLocaleDateString("fr-FR")}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <ActionButtons id={vehicle.id} type="vehicle" onView={() => {}} />
-                  </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <ActionButtons id={vehicle.id} type="vehicle" />
+                      </td>
                 </tr>
               ))}
             </tbody>

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Plus, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, FileText, Trash2, Loader2 } from "lucide-react"
+import { Plus, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, FileText, Trash2, Loader2, AlertTriangle, Check, Edit } from "lucide-react"
 import React, { useState, useEffect } from "react"
 import { ActionButtonsWithRole } from "@/components/ActionButtonsWithRole"
 import { VehicleEditModal } from "@/components/VehicleEditModal"
@@ -17,7 +17,16 @@ export default function VehiclesPage() {
   const [showFactModal, setShowFactModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [factToDelete, setFactToDelete] = useState<string | null>(null)
+  const [editingFact, setEditingFact] = useState<any>(null)
+  const [isEditingFact, setIsEditingFact] = useState(false)
+  const [showSabotageReasonModal, setShowSabotageReasonModal] = useState(false)
+  const [sabotageReason, setSabotageReason] = useState("")
+  const [pendingSabotage, setPendingSabotage] = useState<{vehicleId: string, factIndex: number, facts: any[]} | null>(null)
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [userRole, setUserRole] = useState<'ADMIN' | 'USER'>('USER')
+  const [sabotagedVehicles, setSabotagedVehicles] = useState<Set<string>>(new Set())
+  const [sabotagedFacts, setSabotagedFacts] = useState<Set<string>>(new Set())
+  const [activeTriggerFacts, setActiveTriggerFacts] = useState<Set<string>>(new Set())
   const [factForm, setFactForm] = useState({
     title: "",
     description: "",
@@ -50,6 +59,34 @@ export default function VehiclesPage() {
         if (data.vehicles && data.pagination) {
           setVehicles(data.vehicles)
           setPagination(data.pagination)
+          
+          // Charger les états de sabotage depuis la BDD
+          const sabotagedVehiclesSet = new Set<string>()
+          const sabotagedFactsSet = new Set<string>()
+          const activeTriggerFactsSet = new Set<string>()
+          
+          data.vehicles.forEach((vehicle: any) => {
+            if (vehicle.sabotages && vehicle.sabotages.length > 0) {
+              sabotagedVehiclesSet.add(vehicle.id)
+              
+              // Ajouter tous les faits affectés par les sabotages
+              vehicle.sabotages.forEach((sabotage: any) => {
+                if (sabotage.isActive) {
+                  // Ajouter le fait déclencheur
+                  activeTriggerFactsSet.add(sabotage.triggerFactId)
+                  
+                  // Ajouter tous les faits affectés
+                  sabotage.affectedFactIds.forEach((factId: string) => {
+                    sabotagedFactsSet.add(factId)
+                  })
+                }
+              })
+            }
+          })
+          
+          setSabotagedVehicles(sabotagedVehiclesSet)
+          setSabotagedFacts(sabotagedFactsSet)
+          setActiveTriggerFacts(activeTriggerFactsSet)
         } else {
           // Fallback pour l'ancienne structure
           setVehicles(Array.isArray(data) ? data : [])
@@ -61,12 +98,13 @@ export default function VehiclesPage() {
       }
     }
 
-    // Charger le rôle utilisateur
+    // Charger le rôle utilisateur et l'utilisateur actuel
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
       try {
         const userData = JSON.parse(storedUser)
         setUserRole(userData.role)
+        setCurrentUser(userData)
       } catch (error) {
         console.error('Erreur lors du parsing des données utilisateur:', error)
       }
@@ -126,11 +164,25 @@ export default function VehiclesPage() {
 
   const handleAddFact = (vehicle: any) => {
     setEditingVehicle(vehicle)
+    setEditingFact(null)
+    setIsEditingFact(false)
     setFactForm({
       title: "",
       description: "",
       reportNumber: "",
       photoProofDate: "",
+    })
+    setShowFactModal(true)
+  }
+
+  const handleEditFact = (fact: any) => {
+    setEditingFact(fact)
+    setIsEditingFact(true)
+    setFactForm({
+      title: fact.title || "",
+      description: fact.description || "",
+      reportNumber: fact.reportNumber || "",
+      photoProofDate: fact.photoProofDate || "",
     })
     setShowFactModal(true)
   }
@@ -144,16 +196,31 @@ export default function VehiclesPage() {
     }
 
     try {
-      const response = await fetch('/api/facts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...factForm,
-          vehicleId: editingVehicle.id
-        }),
-      })
+      let response
+      if (isEditingFact && editingFact) {
+        // Mise à jour d'un fait existant
+        response = await fetch(`/api/facts/${editingFact.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...factForm
+          }),
+        })
+      } else {
+        // Création d'un nouveau fait
+        response = await fetch('/api/facts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...factForm,
+            vehicleId: editingVehicle.id
+          }),
+        })
+      }
 
       if (response.ok) {
         // Recharger les véhicules pour mettre à jour les faits
@@ -169,10 +236,37 @@ export default function VehiclesPage() {
         if (vehiclesData.vehicles && vehiclesData.pagination) {
           setVehicles(vehiclesData.vehicles)
           setPagination(vehiclesData.pagination)
+          
+          // Recharger les états de sabotage
+          const sabotagedVehiclesSet = new Set<string>()
+          const sabotagedFactsSet = new Set<string>()
+          const activeTriggerFactsSet = new Set<string>()
+          
+          vehiclesData.vehicles.forEach((vehicle: any) => {
+            if (vehicle.sabotages && vehicle.sabotages.length > 0) {
+              sabotagedVehiclesSet.add(vehicle.id)
+              
+              vehicle.sabotages.forEach((sabotage: any) => {
+                if (sabotage.isActive) {
+                  activeTriggerFactsSet.add(sabotage.triggerFactId)
+                  
+                  sabotage.affectedFactIds.forEach((factId: string) => {
+                    sabotagedFactsSet.add(factId)
+                  })
+                }
+              })
+            }
+          })
+          
+          setSabotagedVehicles(sabotagedVehiclesSet)
+          setSabotagedFacts(sabotagedFactsSet)
+          setActiveTriggerFacts(activeTriggerFactsSet)
         }
         
         setShowFactModal(false)
         setEditingVehicle(null)
+        setEditingFact(null)
+        setIsEditingFact(false)
         setFactForm({
           title: "",
           description: "",
@@ -184,7 +278,7 @@ export default function VehiclesPage() {
         alert('Erreur: ' + error.error)
       }
     } catch (error) {
-      alert('Erreur lors de la création du fait')
+      alert(isEditingFact ? 'Erreur lors de la modification du fait' : 'Erreur lors de la création du fait')
     }
   }
 
@@ -225,6 +319,144 @@ export default function VehiclesPage() {
       }
     } catch (error) {
       alert('Erreur lors de la suppression du fait')
+    }
+  }
+
+  const handleSabotage = (vehicleId: string, factIndex: number, facts: any[]) => {
+    const triggerFact = facts[factIndex]
+    
+    // Vérifier si ce fait déclencheur a déjà un sabotage actif
+    const existingSabotage = activeTriggerFacts.has(triggerFact.id)
+    
+    if (existingSabotage) {
+      // Désactiver le sabotage directement sans demander de raison
+      confirmSabotage(vehicleId, factIndex, facts, false, "")
+    } else {
+      // Activer le sabotage : demander la raison
+      setPendingSabotage({ vehicleId, factIndex, facts })
+      setSabotageReason("")
+      setShowSabotageReasonModal(true)
+    }
+  }
+
+  const confirmSabotage = async (vehicleId: string, factIndex: number, facts: any[], isActive: boolean, reason: string) => {
+    const triggerFact = facts[factIndex]
+    const factsToUpdate = facts.slice(factIndex, Math.min(factIndex + 5, facts.length))
+    const affectedFactIds = factsToUpdate.map(fact => fact.id)
+    
+    const userName = currentUser?.name || currentUser?.email || "Utilisateur inconnu"
+
+    try {
+      // Sauvegarder le sabotage en BDD
+      await fetch('/api/sabotages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          triggerFactId: triggerFact.id,
+          vehicleId,
+          affectedFactIds,
+          isActive,
+          reason: reason || null,
+          createdBy: userName
+        })
+      })
+
+      // Mettre à jour l'état du fait déclencheur
+      setActiveTriggerFacts(prev => {
+        const newSet = new Set(prev)
+        if (isActive) {
+          newSet.add(triggerFact.id)
+        } else {
+          newSet.delete(triggerFact.id)
+        }
+        return newSet
+      })
+
+      // Mettre à jour l'état local des faits affectés
+      setSabotagedFacts(prev => {
+        const newSet = new Set(prev)
+        if (isActive) {
+          // Ajouter tous les faits affectés
+          affectedFactIds.forEach(factId => newSet.add(factId))
+        } else {
+          // Supprimer tous les faits affectés
+          affectedFactIds.forEach(factId => newSet.delete(factId))
+        }
+        return newSet
+      })
+
+      // Mettre à jour l'état du véhicule (orange si au moins un sabotage actif)
+      setSabotagedVehicles(prev => {
+        const newSet = new Set(prev)
+        // Mettre à jour activeTriggerFacts d'abord pour avoir l'état à jour
+        const updatedTriggerFacts = new Set(activeTriggerFacts)
+        if (isActive) {
+          updatedTriggerFacts.add(triggerFact.id)
+        } else {
+          updatedTriggerFacts.delete(triggerFact.id)
+        }
+        
+        // Vérifier s'il y a au moins un sabotage actif pour ce véhicule
+        const hasActiveSabotage = Array.from(updatedTriggerFacts).some(factId => {
+          const fact = facts.find(f => f.id === factId)
+          return fact
+        })
+        
+        if (hasActiveSabotage) {
+          newSet.add(vehicleId)
+        } else {
+          newSet.delete(vehicleId)
+        }
+        return newSet
+      })
+
+      // Recharger les véhicules pour mettre à jour l'affichage
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        ...(searchTerm && { search: searchTerm })
+      })
+      
+      const vehiclesResponse = await fetch(`/api/vehicles?${params}`)
+      const vehiclesData = await vehiclesResponse.json()
+      
+      if (vehiclesData.vehicles && vehiclesData.pagination) {
+        setVehicles(vehiclesData.vehicles)
+        setPagination(vehiclesData.pagination)
+        
+        // Recharger les états de sabotage
+        const sabotagedVehiclesSet = new Set<string>()
+        const sabotagedFactsSet = new Set<string>()
+        const activeTriggerFactsSet = new Set<string>()
+        
+        vehiclesData.vehicles.forEach((vehicle: any) => {
+          if (vehicle.sabotages && vehicle.sabotages.length > 0) {
+            sabotagedVehiclesSet.add(vehicle.id)
+            
+            vehicle.sabotages.forEach((sabotage: any) => {
+              if (sabotage.isActive) {
+                activeTriggerFactsSet.add(sabotage.triggerFactId)
+                
+                sabotage.affectedFactIds.forEach((factId: string) => {
+                  sabotagedFactsSet.add(factId)
+                })
+              }
+            })
+          }
+        })
+        
+        setSabotagedVehicles(sabotagedVehiclesSet)
+        setSabotagedFacts(sabotagedFactsSet)
+        setActiveTriggerFacts(activeTriggerFactsSet)
+      }
+
+      // Fermer le modal si ouvert
+      setShowSabotageReasonModal(false)
+      setPendingSabotage(null)
+      setSabotageReason("")
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du sabotage:', error)
+      alert('Erreur lors de la sauvegarde du sabotage')
     }
   }
 
@@ -292,6 +524,9 @@ export default function VehiclesPage() {
                       Faits
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Sabot
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -300,7 +535,13 @@ export default function VehiclesPage() {
               {vehicles.map((vehicle: any) => (
                 <React.Fragment key={vehicle.id}>
                   <tr 
-                    className="hover:bg-gray-700 cursor-pointer"
+                    className={`hover:bg-gray-700 cursor-pointer ${
+                      sabotagedVehicles.has(vehicle.id) 
+                        ? 'bg-orange-900/30 border-l-4 border-orange-500' 
+                        : (vehicle.facts?.length || 0) >= 5 
+                          ? 'bg-yellow-900/30 border-l-4 border-yellow-500' 
+                          : ''
+                    }`}
                     onClick={() => toggleVehicleExpansion(vehicle.id)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
@@ -333,6 +574,49 @@ export default function VehiclesPage() {
                         </span>
                       </div>
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      {(() => {
+                        // Trouver le dernier sabotage actif (le plus récent)
+                        const activeSabotages = vehicle.sabotages || []
+                        const lastActiveSabotage = activeSabotages.length > 0 
+                          ? activeSabotages.sort((a: any, b: any) => 
+                              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                            )[0]
+                          : null
+
+                        return lastActiveSabotage ? (
+                          <div className="flex flex-col gap-2 max-w-xs">
+                            <div className="flex items-center mb-1">
+                              <AlertTriangle className="h-4 w-4 mr-1 text-orange-400" />
+                              <span className="bg-orange-900/30 text-orange-300 px-2 py-1 rounded-md text-xs font-semibold">
+                                Sous sabot
+                              </span>
+                            </div>
+                            <div className="p-2 rounded border bg-orange-900/20 border-orange-500/50">
+                              <div className="font-semibold text-white text-xs mb-1">
+                                {lastActiveSabotage.triggerFactTitle}
+                              </div>
+                              {lastActiveSabotage.reason && (
+                                <div className="text-gray-300 text-xs mb-1">
+                                  {lastActiveSabotage.reason}
+                                </div>
+                              )}
+                              <div className="flex items-center justify-between text-gray-400 text-xs">
+                                <span>{lastActiveSabotage.createdBy || 'Inconnu'}</span>
+                                <span>
+                                  {lastActiveSabotage.triggerFactCreatedAt 
+                                    ? new Date(lastActiveSabotage.triggerFactCreatedAt).toLocaleDateString("fr-FR")
+                                    : 'Date inconnue'
+                                  }
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-500 text-xs">Aucun</span>
+                        )
+                      })()}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                         <ActionButtonsWithRole 
@@ -353,7 +637,7 @@ export default function VehiclesPage() {
                   </tr>
                   {expandedVehicles.has(vehicle.id) && (
                     <tr>
-                      <td colSpan={7} className="px-6 py-6 bg-gray-700">
+                      <td colSpan={8} className="px-6 py-6 bg-gray-700">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <h4 className="text-lg font-semibold text-white flex items-center">
@@ -363,24 +647,66 @@ export default function VehiclesPage() {
                           </div>
                           {vehicle.facts && vehicle.facts.length > 0 ? (
                             <div className="grid gap-3">
-                              {vehicle.facts.map((fact: any) => (
-                                <div key={fact.id} className="bg-gray-600 border border-gray-500 rounded-lg p-4 hover:bg-gray-500 transition-colors">
-                                  <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                      <div className="flex items-start justify-between">
-                                        <h5 className="text-base font-semibold text-white mb-2">{fact.title}</h5>
-                                        {userRole === 'ADMIN' && (
+                              {vehicle.facts.map((fact: any, index: number) => {
+                                const isFifthFact = (vehicle.facts.length - index) % 5 === 0 && vehicle.facts.length >= 5
+                                const isFactSabotaged = sabotagedFacts.has(fact.id)
+                                return (
+                                  <div key={fact.id} className={`bg-gray-600 border border-gray-500 rounded-lg p-4 hover:bg-gray-500 transition-colors ${
+                                    isFifthFact ? 'border-yellow-400 border-2' : ''
+                                  } ${
+                                    isFactSabotaged ? 'bg-green-900/30 border-green-500 border-2' : ''
+                                  }`}>
+                                    <div className="flex justify-between items-start">
+                                      <div className="flex-1">
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex items-center">
+                                            <h5 className="text-base font-semibold text-white mb-2">{fact.title}</h5>
+                                            {isFifthFact && (
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation()
+                                                  handleSabotage(vehicle.id, index, vehicle.facts)
+                                                }}
+                                                className={`ml-3 px-3 py-1 rounded-md text-sm flex items-center transition-colors ${
+                                                  activeTriggerFacts.has(fact.id) 
+                                                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                                    : 'bg-red-600 hover:bg-red-700 text-white'
+                                                }`}
+                                                title={activeTriggerFacts.has(fact.id) ? "Désactiver le sabot" : "Marquer comme saboté"}
+                                              >
+                                                {activeTriggerFacts.has(fact.id) ? (
+                                                  <Check className="h-4 w-4 mr-1" />
+                                                ) : (
+                                                  <AlertTriangle className="h-4 w-4 mr-1" />
+                                                )}
+                                                SABOT
+                                              </button>
+                                            )}
+                                          </div>
+                                        <div className="flex items-center space-x-2">
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation()
-                                              handleDeleteFact(fact.id)
+                                              handleEditFact(fact)
                                             }}
-                                            className="text-red-400 hover:text-red-300 ml-4 p-2 rounded hover:bg-red-900/20 transition-colors"
-                                            title="Supprimer ce fait"
+                                            className="text-blue-400 hover:text-blue-300 p-2 rounded hover:bg-blue-900/20 transition-colors"
+                                            title="Modifier ce fait"
                                           >
-                                            <Trash2 className="h-4 w-4" />
+                                            <Edit className="h-4 w-4" />
                                           </button>
-                                        )}
+                                          {userRole === 'ADMIN' && (
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation()
+                                                handleDeleteFact(fact.id)
+                                              }}
+                                              className="text-red-400 hover:text-red-300 p-2 rounded hover:bg-red-900/20 transition-colors"
+                                              title="Supprimer ce fait"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </button>
+                                          )}
+                                        </div>
                                       </div>
                                       {fact.description && (
                                         <p className="text-sm text-gray-300 mb-3 leading-relaxed">{fact.description}</p>
@@ -403,7 +729,8 @@ export default function VehiclesPage() {
                                     </div>
                                   </div>
                                 </div>
-                              ))}
+                                )
+                              })} 
                             </div>
                           ) : (
                             <div className="text-center py-8">
@@ -514,17 +841,39 @@ export default function VehiclesPage() {
         </div>
       )}
 
-      {/* Modal de création de fait */}
-      {showFactModal && editingVehicle && (
+      {/* Modal de création/édition de fait */}
+      {showFactModal && (editingVehicle || editingFact) && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setShowFactModal(false)} />
+            <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => {
+              setShowFactModal(false)
+              setEditingFact(null)
+              setIsEditingFact(false)
+              setFactForm({
+                title: "",
+                description: "",
+                reportNumber: "",
+                photoProofDate: "",
+              })
+            }} />
             
             <div className="relative bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full">
               <div className="flex items-center justify-between p-6 border-b border-gray-700">
-                <h2 className="text-xl font-semibold text-white">Ajouter un fait</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  {isEditingFact ? "Modifier le fait" : "Ajouter un fait"}
+                </h2>
                 <button
-                  onClick={() => setShowFactModal(false)}
+                  onClick={() => {
+                    setShowFactModal(false)
+                    setEditingFact(null)
+                    setIsEditingFact(false)
+                    setFactForm({
+                      title: "",
+                      description: "",
+                      reportNumber: "",
+                      photoProofDate: "",
+                    })
+                  }}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   <X className="h-6 w-6" />
@@ -590,7 +939,17 @@ export default function VehiclesPage() {
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
                   <button
                     type="button"
-                    onClick={() => setShowFactModal(false)}
+                    onClick={() => {
+                      setShowFactModal(false)
+                      setEditingFact(null)
+                      setIsEditingFact(false)
+                      setFactForm({
+                        title: "",
+                        description: "",
+                        reportNumber: "",
+                        photoProofDate: "",
+                      })
+                    }}
                     className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
                   >
                     Annuler
@@ -599,10 +958,88 @@ export default function VehiclesPage() {
                     type="submit"
                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
                   >
-                    Créer le fait
+                    {isEditingFact ? "Modifier le fait" : "Créer le fait"}
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de raison de sabotage */}
+      {showSabotageReasonModal && pendingSabotage && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => {
+              setShowSabotageReasonModal(false)
+              setPendingSabotage(null)
+              setSabotageReason("")
+            }} />
+            
+            <div className="relative bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+              <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                <h2 className="text-xl font-semibold text-white">Raison du sabotage</h2>
+                <button
+                  onClick={() => {
+                    setShowSabotageReasonModal(false)
+                    setPendingSabotage(null)
+                    setSabotageReason("")
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Pourquoi ce véhicule est-il mis sous sabot ? *
+                  </label>
+                  <textarea
+                    value={sabotageReason}
+                    onChange={(e) => setSabotageReason(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                    placeholder="Ex: Accumulation de 5 faits, Infraction grave, etc."
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSabotageReasonModal(false)
+                      setPendingSabotage(null)
+                      setSabotageReason("")
+                    }}
+                    className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (sabotageReason.trim()) {
+                        confirmSabotage(
+                          pendingSabotage.vehicleId,
+                          pendingSabotage.factIndex,
+                          pendingSabotage.facts,
+                          true,
+                          sabotageReason
+                        )
+                      } else {
+                        alert("Veuillez indiquer la raison du sabotage")
+                      }
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
+                  >
+                    Mettre sous sabot
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

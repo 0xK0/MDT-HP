@@ -75,7 +75,42 @@ export async function GET(request: NextRequest) {
             createdAt: 'desc'
           }
         })
-        return { ...vehicle, facts }
+
+        // Récupérer tous les sabotages (actifs et inactifs) pour l'historique
+        const allSabotages = await (prisma as any).sabotage.findMany({
+          where: { 
+            vehicleId: vehicle.id
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          select: {
+            id: true,
+            triggerFactId: true,
+            affectedFactIds: true,
+            reason: true,
+            createdBy: true,
+            isActive: true,
+            createdAt: true
+          }
+        })
+
+        // Enrichir tous les sabotages avec les titres et dates de création des faits déclencheurs
+        const enrichedAllSabotages = await Promise.all(
+          allSabotages.map(async (sabotage: any) => {
+            const triggerFact = facts.find((f: any) => f.id === sabotage.triggerFactId)
+            return {
+              ...sabotage,
+              triggerFactTitle: triggerFact?.title || 'Fait supprimé',
+              triggerFactCreatedAt: triggerFact?.createdAt || null
+            }
+          })
+        )
+
+        // Séparer les sabotages actifs pour la logique
+        const activeSabotages = enrichedAllSabotages.filter((s: any) => s.isActive)
+
+        return { ...vehicle, facts, sabotages: activeSabotages, allSabotages: enrichedAllSabotages }
       })
     )
 
